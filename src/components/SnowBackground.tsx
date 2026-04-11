@@ -1,0 +1,192 @@
+import React, { useEffect, useRef } from 'react';
+
+const vertexShaderSource = `#version 300 es
+in vec4 a_position;
+void main() {
+  gl_Position = a_position;
+}
+`;
+
+const fragmentShaderSource = `#version 300 es
+precision highp float;
+
+uniform vec3 iResolution;
+uniform float iTime;
+uniform float iIntensity;
+
+out vec4 fragColor;
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    float snow = 0.0;
+    float gradient = (1.0-float(fragCoord.y / iResolution.x))*0.4;
+    float random = fract(sin(dot(fragCoord.xy,vec2(12.9898,78.233)))* 43758.5453);
+    
+    // Use iIntensity to control snow density
+    float threshold = 0.08 * (0.2 + iIntensity * 1.8);
+
+    for(int k=0;k<6;k++){
+        for(int i=0;i<12;i++){
+            float cellSize = 2.0 + (float(i)*3.0);
+			float downSpeed = 0.3+(sin(iTime*0.4+float(k+i*20))+1.0)*0.00008;
+            vec2 uv = (fragCoord.xy / iResolution.x)+vec2(0.01*sin((iTime+float(k*6185))*0.6+float(i))*(5.0/float(i)),downSpeed*(iTime+float(k*1352))*(1.0/float(i)));
+            vec2 uvStep = (ceil((uv)*cellSize-vec2(0.5,0.5))/cellSize);
+            float x = fract(sin(dot(uvStep.xy,vec2(12.9898+float(k)*12.0,78.233+float(k)*315.156)))* 43758.5453+float(k)*12.0)-0.5;
+            float y = fract(sin(dot(uvStep.xy,vec2(62.2364+float(k)*23.0,94.674+float(k)*95.0)))* 62159.8432+float(k)*12.0)-0.5;
+
+            float randomMagnitude1 = sin(iTime*2.5)*0.7/cellSize;
+            float randomMagnitude2 = cos(iTime*2.5)*0.7/cellSize;
+
+            float d = 5.0*distance((uvStep.xy + vec2(x*sin(y),y)*randomMagnitude1 + vec2(y,x)*randomMagnitude2),uv.xy);
+
+            float omiVal = fract(sin(dot(uvStep.xy,vec2(32.4691,94.615)))* 31572.1684);
+            if(omiVal<threshold){
+                float newd = (x+1.0)*0.4*clamp(1.9-d*(15.0+(x*6.3))*(cellSize/1.4),0.0,1.0);
+                snow += newd;
+            }
+        }
+    }
+    
+    fragColor = vec4(snow)+gradient*vec4(0.4,0.8,1.0,0.0) + random*0.01;
+}
+
+void main() {
+    mainImage(fragColor, gl_FragCoord.xy);
+}
+`;
+
+interface SnowBackgroundProps {
+  intensity?: number;
+  volume?: number;
+  whiteNoiseEnabled?: boolean;
+}
+
+export default function SnowBackground({ 
+  intensity = 0.5, 
+  volume = 0.5,
+  whiteNoiseEnabled = true
+}: SnowBackgroundProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Handle Audio
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+      if (whiteNoiseEnabled) {
+        audioRef.current.play().catch(e => console.log('Snow audio autoplay blocked:', e));
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [volume, whiteNoiseEnabled]);
+
+  // Handle WebGL Shader
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const gl = canvas.getContext('webgl2');
+    if (!gl) {
+      console.error('WebGL 2 not supported');
+      return;
+    }
+
+    // Compile shaders
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER)!;
+    gl.shaderSource(vertexShader, vertexShaderSource);
+    gl.compileShader(vertexShader);
+
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)!;
+    gl.shaderSource(fragmentShader, fragmentShaderSource);
+    gl.compileShader(fragmentShader);
+    
+    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+        console.error(gl.getShaderInfoLog(fragmentShader));
+    }
+
+    const program = gl.createProgram()!;
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+
+    // Setup geometry
+    const positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([
+        -1.0, -1.0,
+         1.0, -1.0,
+        -1.0,  1.0,
+        -1.0,  1.0,
+         1.0, -1.0,
+         1.0,  1.0,
+      ]),
+      gl.STATIC_DRAW
+    );
+
+    const positionLocation = gl.getAttribLocation(program, 'a_position');
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+    // Uniforms
+    const iResolutionLocation = gl.getUniformLocation(program, 'iResolution');
+    const iTimeLocation = gl.getUniformLocation(program, 'iTime');
+    const iIntensityLocation = gl.getUniformLocation(program, 'iIntensity');
+
+    let animationFrameId: number;
+    const startTime = performance.now();
+
+    const render = (time: number) => {
+      // Resize canvas if needed
+      if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
+
+      gl.clearColor(0, 0, 0, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      gl.useProgram(program);
+
+      gl.uniform3f(iResolutionLocation, canvas.width, canvas.height, 1.0);
+      gl.uniform1f(iTimeLocation, (time - startTime) / 1000.0);
+      gl.uniform1f(iIntensityLocation, intensity);
+
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    animationFrameId = requestAnimationFrame(render);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [intensity]);
+
+  return (
+    <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-surface">
+      <img 
+        src="./images/winter.jpg" 
+        alt="Snowy mountain background" 
+        className="absolute inset-0 w-full h-full object-cover scale-105 opacity-60"
+        referrerPolicy="no-referrer"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-surface/30 to-surface/90"></div>
+      <canvas 
+        ref={canvasRef} 
+        className="absolute inset-0 w-full h-full mix-blend-screen opacity-80" 
+      />
+      {/* Snow audio track (wind/snow sound) */}
+      <audio 
+        ref={audioRef} 
+        src="./sounds/wind.mp3"
+        loop 
+        autoPlay
+      />
+    </div>
+  );
+}
