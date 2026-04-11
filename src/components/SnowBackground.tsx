@@ -145,8 +145,20 @@ export default function SnowBackground({
 
     let animationFrameId: number;
     const startTime = performance.now();
+    
+    // 帧率控制：目标 30fps，每帧间隔约 33ms
+    const targetFPS = 30;
+    const frameInterval = 1000 / targetFPS;
+    let lastRenderTime = 0;
 
     const render = (time: number) => {
+      // 帧率控制：跳过太短的帧
+      const elapsed = time - lastRenderTime;
+      if (elapsed < frameInterval) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
+      lastRenderTime = time - (elapsed % frameInterval);
       // Resize canvas if needed
       if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
         canvas.width = window.innerWidth;

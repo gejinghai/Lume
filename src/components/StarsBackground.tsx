@@ -169,8 +169,22 @@ export default function StarsBackground({
     let stars = Array.from({ length: starDensity }, () => new Star());
     const shootingStars = Array.from({ length: 4 }, () => new ShootingStar());
     let animationFrameId: number;
+    
+    // 帧率控制：目标 30fps，每帧间隔约 33ms
+    const targetFPS = 30;
+    const frameInterval = 1000 / targetFPS;
+    let lastRenderTime = 0;
 
     const render = () => {
+      // 帧率控制：跳过太短的帧
+      const now = performance.now();
+      const elapsed = now - lastRenderTime;
+      if (elapsed < frameInterval) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
+      lastRenderTime = now - (elapsed % frameInterval);
+      
       ctx.clearRect(0, 0, width, height);
       
       // Draw background stars

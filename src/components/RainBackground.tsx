@@ -356,8 +356,20 @@ export default function RainBackground({
 
     let animationFrameId: number;
     const startTime = performance.now();
+    
+    // 帧率控制：目标 30fps，每帧间隔约 33ms
+    const targetFPS = 30;
+    const frameInterval = 1000 / targetFPS;
+    let lastRenderTime = 0;
 
     const render = (time: number) => {
+      // 帧率控制：跳过太短的帧
+      const elapsed = time - lastRenderTime;
+      if (elapsed < frameInterval) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
+      lastRenderTime = time - (elapsed % frameInterval);
       // Update intensity dynamically
       // Multiply by canvas.height because the shader divides iMouse.y by iResolution.y
       mouseY = intensity * canvas.height;
