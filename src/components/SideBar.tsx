@@ -205,7 +205,7 @@ function TabItem({ tab, isActive, onSelect, onDelete }: { tab: TabData, isActive
           }`}
           title="Delete Document"
         >
-          <Trash2 className="w-3.5 h-3.5" />
+          <Trash2 className="w-3.5 h-3.5 hover:text-red-400" />
         </button>
       </div>
       <span className="text-[10px] uppercase tracking-wider opacity-50 truncate pl-5.5">

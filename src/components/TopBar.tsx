@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { Settings, PanelLeft, Type, CloudRain, Snowflake, Star, Waves, X, Plus, Circle } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Settings, PanelLeft, Type, CloudRain, Snowflake, Star, Waves, X, Plus, Circle, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 
 /**
@@ -43,6 +43,33 @@ export default function TopBar({
   const tabsScrollRef = useRef<HTMLDivElement>(null);
   // 上一个标签数量引用（用于检测新标签）
   const prevTabCountRef = useRef(tabs.length);
+  // 字体大小下拉框引用
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  // 字体大小下拉框状态
+  const [isFontSizeOpen, setIsFontSizeOpen] = useState(false);
+  
+  // 字体大小选项
+  const fontSizes = [
+    { value: 14, label: '14px' },
+    { value: 16, label: '16px' },
+    { value: 18, label: '18px' },
+    { value: 20, label: '20px' },
+    { value: 22, label: '22px' },
+    { value: 24, label: '24px' },
+    { value: 28, label: '28px' },
+    { value: 32, label: '32px' },
+  ];
+
+  // 点击外部关闭下拉框
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsFontSizeOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (tabs.length > prevTabCountRef.current && tabsScrollRef.current) {
@@ -157,20 +184,44 @@ export default function TopBar({
               <Type className="w-4 h-4" />
               <span className="text-[10px] uppercase font-sans tracking-wider opacity-70">{fontFamily}</span>
             </button>
-            <div className="flex items-center rounded-md border border-outline-variant/15 bg-white/5 px-1">
+            <div className="relative flex items-center" ref={dropdownRef}>
               <Type className="w-3.5 h-3.5 text-on-surface-variant opacity-70 mr-1" />
-              <select
-                value={editorFontSize}
-                onChange={(e) => onEditorFontSizeChange(Number(e.target.value))}
-                className="bg-transparent text-[10px] font-sans tracking-wider text-on-surface-variant/90 py-1 pr-1 outline-none"
-                title="Editor font size"
-              >
-                {[14, 16, 18, 20, 22, 24, 28, 32].map((size) => (
-                  <option key={size} value={size} className="bg-surface text-on-surface">
-                    {size}px
-                  </option>
-                ))}
-              </select>
+              <button 
+                onClick={() => setIsFontSizeOpen(!isFontSizeOpen)} 
+                className="flex items-center space-x-1 bg-transparent text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-md transition-colors text-xs pl-1 pr-1 py-1 outline-none cursor-pointer" 
+              > 
+                <span>{fontSizes.find(f => f.value === editorFontSize)?.label || '18px'}</span> 
+                <ChevronDown className={`w-3 h-3 transition-transform ${isFontSizeOpen ? 'rotate-180' : ''}`} /> 
+              </button>
+              
+              <AnimatePresence> 
+                {isFontSizeOpen && ( 
+                  <motion.div 
+                    initial={{ opacity: 0, y: 5 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    exit={{ opacity: 0, y: 5 }} 
+                    transition={{ duration: 0.15 }} 
+                    className="absolute top-full right-0 mt-1 w-20 bg-surface-highest/80 backdrop-blur-xl border border-outline-variant/20 rounded-md shadow-xl overflow-hidden z-50" 
+                  > 
+                    {fontSizes.map((size) => ( 
+                      <button 
+                        key={size.value} 
+                        onClick={() => { 
+                          onEditorFontSizeChange(size.value); 
+                          setIsFontSizeOpen(false); 
+                        }} 
+                        className={`w-full text-left px-3 py-2 text-xs transition-colors ${ 
+                          editorFontSize === size.value 
+                            ? 'bg-secondary/20 text-secondary' 
+                            : 'text-on-surface hover:bg-secondary/10 hover:text-secondary' 
+                        }`} 
+                      > 
+                        {size.label} 
+                      </button> 
+                    ))} 
+                  </motion.div> 
+                )} 
+              </AnimatePresence> 
             </div>
             <button 
               onClick={toggleSettings}
