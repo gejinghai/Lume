@@ -61,6 +61,26 @@ npm run electron:build
 npm run electron:build:cn
 ```
 
+一键打包脚本（推荐）：
+
+```bash
+cd scripts
+./build-dmg.sh
+```
+
+打包完成后，DMG 文件中会包含：
+- **Lume.app** - 主应用程序
+- **InitLume.app** - 首次启动助手，用于移除安全限制
+- **安装说明.txt** - 安装步骤说明
+- **Applications** - 快捷方式，指向系统应用程序文件夹
+
+**安装步骤：**
+
+1. 打开 DMG 文件
+2. 将 Lume.app 拖入「应用程序」文件夹
+3. 双击运行 **首次启动助手 (InitLume.app)** 移除安全限制
+4. 然后即可正常打开 Lume
+
 ### 开发模式
 
 热重载开发：
@@ -110,6 +130,9 @@ Lume/
 ├── index.html            # HTML 入口文件
 ├── metadata.json         # Electron 应用元数据
 ├── package.json          # 项目配置和依赖
+├── scripts/              # 打包脚本
+│   ├── build-dmg.sh      # 一键打包脚本
+│   └── create-init-app.sh # 创建首次启动助手脚本
 ├── tsconfig.json         # TypeScript 配置
 ├── vite.config.ts        # Vite 构建配置
 └── .gitignore           # Git 忽略配置

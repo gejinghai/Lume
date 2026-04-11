@@ -45,7 +45,7 @@
   "build": {
     "appId": "com.lume.app",
     "productName": "Lume",
-    "icon": "public/image/logo.png",
+    "icon": "public/images/logo.png",
     "directories": {
       "output": "release"
     },
@@ -53,10 +53,16 @@
       "dist/**/*",
       "electron/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "scripts/InitLume.app",
+        "to": "InitLume.app"
+      }
+    ],
     "mac": {
       "target": "dmg",
       "category": "public.app-category.productivity",
-      "icon": "public/image/logo.png"
+      "icon": "public/images/logo.png"
     },
     "win": {
       "target": "nsis"

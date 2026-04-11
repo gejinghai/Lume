@@ -1,0 +1,17 @@
+#!/bin/bash
+
+APP_PATH="/Applications/Lume.app"
+
+if [ ! -d "$APP_PATH" ]; then
+  osascript -e 'display dialog "请先将 Lume.app 拖入应用程序文件夹（/Applications）后再运行本工具。" buttons {"好"} default button 1 with icon stop'
+  exit 1
+fi
+
+osascript -e 'display dialog "正在为 Lume.app 进行首次启动准备..." buttons {"好"} default button 1' || true
+
+if xattr -l "$APP_PATH" 2>/dev/null | grep -q "com.apple.quarantine"; then
+    xattr -d -r com.apple.quarantine "$APP_PATH" 2>/dev/null
+    osascript -e 'display dialog "准备完成！已成功移除安全限制。您现在可以在应用程序中正常打开 Lume。" buttons {"好"} default button 1 with icon note' || true
+else
+    osascript -e 'display dialog "Lume 已经准备就绪！您现在可以在应用程序中正常打开 Lume。" buttons {"好"} default button 1 with icon note' || true
+fi
