@@ -1,17 +1,30 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+/**
+ * 环境音乐播放器组件Props接口
+ */
 interface AmbientMusicPlayerProps {
-  volume: number;
-  enabled: boolean;
+  volume: number;     // 音量大小 (0-1)
+  enabled: boolean;   // 是否启用音乐
 }
 
+/**
+ * AmbientMusicPlayer 环境音乐播放器
+ * 播放轻柔的背景音乐，支持音量控制和播放列表
+ * 音乐资源托管在腾讯云 COS
+ */
 export default function AmbientMusicPlayer({ volume, enabled }: AmbientMusicPlayerProps) {
+  // 音频元素引用
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [playlist, setPlaylist] = useState<string[]>(['piano1.mp3']);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  
+  // 播放列表状态
+  const [playlist, setPlaylist] = useState<string[]>(['piano1.mp3']);  // 默认播放列表
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);      // 当前曲目索引
+  
+  // 音乐资源基础 URL（腾讯云 COS）
   const COS_BASE_URL = 'https://music-1379744664.cos.ap-guangzhou.myqcloud.com/light-music';
 
-  // Fetch playlist.json on mount via local API proxy
+  // 组件挂载时获取播放列表
   useEffect(() => {
     fetch(`${COS_BASE_URL}/playlist.json`)
       .then(res => {
@@ -28,14 +41,14 @@ export default function AmbientMusicPlayer({ volume, enabled }: AmbientMusicPlay
       });
   }, []);
 
-  // Handle Volume
+  // 监听音量变化
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = volume * 0.8; // Make it a bit louder so it's not drowned out by rain/wind
+      audioRef.current.volume = volume * 0.8; // 音乐音量设为输入音量的80%，避免被环境音淹没
     }
   }, [volume]);
 
-  // Handle Play/Pause and Track changes
+  // 监听启用状态和曲目变化
   useEffect(() => {
     if (audioRef.current) {
       if (enabled) {

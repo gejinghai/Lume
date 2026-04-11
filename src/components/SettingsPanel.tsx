@@ -2,26 +2,34 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Volume2, CloudRain, Zap, Snowflake, Star, Moon, Sparkles } from 'lucide-react';
 
+/**
+ * SettingsPanelProps 设置面板组件接口
+ */
 interface SettingsPanelProps {
-  isOpen: boolean;
-  onClose: () => void;
-  rainIntensity: number;
-  setRainIntensity: (val: number) => void;
-  volume: number;
-  setVolume: (val: number) => void;
-  thunderEnabled: boolean;
-  setThunderEnabled: (val: boolean) => void;
-  starDensity: number;
-  setStarDensity: (val: number) => void;
-  whiteNoiseEnabled: boolean;
-  setWhiteNoiseEnabled: (val: boolean) => void;
-  ambientSoundsEnabled: boolean;
-  setAmbientSoundsEnabled: (val: boolean) => void;
-  auroraCount: number;
-  setAuroraCount: (val: number) => void;
-  scene: string;
+  isOpen: boolean;                           // 面板是否打开
+  onClose: () => void;                      // 关闭面板回调
+  rainIntensity: number;                      // 雨滴强度 (0-1)
+  setRainIntensity: (val: number) => void;  // 设置雨滴强度
+  volume: number;                          // 音量大小 (0-1)
+  setVolume: (val: number) => void;          // 设置音量
+  thunderEnabled: boolean;                    // 雷声开关
+  setThunderEnabled: (val: boolean) => void;     // 设置雷声
+  starDensity: number;                    // 星星密度
+  setStarDensity: (val: number) => void;     // 设置星星密度
+  whiteNoiseEnabled: boolean;               // 白噪音开关
+  setWhiteNoiseEnabled: (val: boolean) => void;  // 设置白噪音
+  ambientSoundsEnabled: boolean;            // 环境音开关
+  setAmbientSoundsEnabled: (val: boolean) => void;  // 设置环境音
+  auroraCount: number;                  // 极光数量
+  setAuroraCount: (val: number) => void;      // 设置极光数量
+  scene: string;                      // 当前场景类型
 }
 
+/**
+ * SettingsPanel 设置面板组件
+ * 可调节背景效果、声音、环境参数等
+ * 使用 Framer Motion 实现滑入动画
+ */
 export default function SettingsPanel({
   isOpen,
   onClose,

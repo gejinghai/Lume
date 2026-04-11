@@ -2,15 +2,25 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Plus, FolderOpen } from 'lucide-react';
 
+/**
+ * WelcomePageProps 欢迎页组件接口
+ */
 interface WelcomePageProps {
-  onCreateDocument: () => void;
-  onOpenDocument: () => void;
-  documentCount: number;
+  onCreateDocument: () => void;   // 新建文档回调
+  onOpenDocument: () => void;     // 打开文档回调
+  documentCount: number;          // 已有文档数量
 }
 
+/**
+ * WelcomePage 欢迎页组件
+ * 当没有打开文档时显示
+ * 提供新建文档和打开文档的入口
+ * 使用 Framer Motion 实现淡入动画
+ */
 export default function WelcomePage({ onCreateDocument, onOpenDocument, documentCount }: WelcomePageProps) {
   return (
     <div className="relative w-full h-full glass-panel rounded-xl overflow-hidden flex flex-col items-center justify-center p-8">
+      {/* 欢迎内容容器 */}
       <motion.div 
         className="text-center max-w-md"
         initial={{ opacity: 0, y: 20 }}

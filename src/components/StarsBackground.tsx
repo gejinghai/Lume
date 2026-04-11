@@ -1,17 +1,27 @@
 import React, { useEffect, useRef } from 'react';
 
+/**
+ * StarsBackgroundProps 接口
+ */
 interface StarsBackgroundProps {
-  volume?: number;
-  starDensity?: number;
-  whiteNoiseEnabled?: boolean;
+  volume?: number;           // 音量大小 (0-1)
+  starDensity?: number;       // 星星密度
+  whiteNoiseEnabled?: boolean;  // 白噪音开关
 }
 
+/**
+ * StarsBackground 星空背景组件
+ * 使用 Canvas 2D 渲染静态星空
+ * 支持流星效果和环境白噪音
+ */
 export default function StarsBackground({ 
   volume = 0.5, 
   starDensity = 400, 
   whiteNoiseEnabled = true 
 }: StarsBackgroundProps) {
+  // Canvas 引用
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // 音频引用
   const audioRef1 = useRef<HTMLAudioElement>(null);
   const audioRef2 = useRef<HTMLAudioElement>(null);
 

@@ -1,5 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 
+/**
+ * SnowBackground 雪花背景组件
+ * 使用 WebGL 着色器渲染动态雪花效果
+ * 包含雪花飘落、堆积等视觉效果
+ */
+
+// 顶点着色器
 const vertexShaderSource = `#version 300 es
 in vec4 a_position;
 void main() {
@@ -7,6 +14,7 @@ void main() {
 }
 `;
 
+// 片元着色器
 const fragmentShaderSource = `#version 300 es
 precision highp float;
 

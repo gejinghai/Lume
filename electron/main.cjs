@@ -1,14 +1,33 @@
+/**
+ * Lume Electron 主进程入口
+ * 负责窗口管理、菜单创建、快捷键注册、文件读写等核心功能
+ */
+
 const { app, BrowserWindow, ipcMain, Menu, shell, dialog, globalShortcut } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
+// 主窗口实例
 let mainWindow = null;
-const isDev = false; // Always use local build for simplicity
+// 是否开发模式（始终使用本地构建）
+const isDev = false;
 
+/**
+ * 转义 YAML 属性的值
+ * 处理换行符和引号，确保安全写入文件
+ * @param {string} value - 要转义的值
+ * @returns {string} 转义后的值
+ */
 function escapeFrontmatterValue(value = '') {
   return String(value).replace(/\r?\n/g, ' ').replace(/"/g, '\\"');
 }
 
+/**
+ * 将文档对象转换为 Markdown 格式
+ * 使用 YAML frontmatter 存储元数据
+ * @param {Object} param0 - 文档对象
+ * @returns {string} Markdown 格式的文档字符串
+ */
 function toMarkdownDocument({ id, title, subtitle, content, updatedAt }) {
   const safeId = escapeFrontmatterValue(id);
   const safeTitle = escapeFrontmatterValue(title || 'Untitled Document');
@@ -19,8 +38,16 @@ function toMarkdownDocument({ id, title, subtitle, content, updatedAt }) {
   return `---\nid: "${safeId}"\ntitle: "${safeTitle}"\nsubtitle: "${safeSubtitle}"\nupdatedAt: "${safeUpdatedAt}"\n---\n\n${body}`;
 }
 
+/**
+ * 解析 Markdown 文档
+ * 从 YAML frontmatter 中提取元数据
+ * @param {string} raw - 原始 Markdown 内容
+ * @param {string} fallbackId - 备用 ID（当无法解析时使用）
+ * @returns {Object} 解析后的文档对象
+ */
 function parseMarkdownDocument(raw, fallbackId) {
   const normalized = String(raw || '');
+  // 匹配 YAML frontmatter：--- ... --- ... content
   const match = normalized.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
 
   if (!match) {

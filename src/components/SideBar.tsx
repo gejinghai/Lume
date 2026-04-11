@@ -3,24 +3,35 @@ import { Search, Plus, Trash2, FileText, Circle } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { TabData } from '../App';
 
+/**
+ * SideBarProps 侧边栏组件接口
+ */
 interface SideBarProps {
-  isOpen: boolean;
-  tabs: TabData[];
-  activeTabId: string | null;
-  onSelectTab: (id: string) => void;
-  onDeleteTab: (id: string) => void;
-  onAddTab: () => void;
-  onReorderTabs: (newTabs: TabData[]) => void;
+  isOpen: boolean;                    // 侧边栏是否打开
+  tabs: TabData[];                    // 所有文档列表
+  activeTabId: string | null;          // 当前活动文档 ID
+  onSelectTab: (id: string) => void;  // 选择文档回调
+  onDeleteTab: (id: string) => void;   // 删除文档回调
+  onAddTab: () => void;               // 新建文档回调
+  onReorderTabs: (newTabs: TabData[]) => void;  // 重新排序回调
 }
 
+/**
+ * SideBar 侧边栏组件
+ * 显示所有文档列表，支持搜索、删除、拖拽排序
+ * 使用 Framer Motion 实现动画效果
+ */
 export default function SideBar({ 
   isOpen, tabs, activeTabId, onSelectTab, onDeleteTab, onAddTab, onReorderTabs 
 }: SideBarProps) {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [pendingDeleteTab, setPendingDeleteTab] = useState<TabData | null>(null);
+  // 搜索状态
+  const [isSearchOpen, setIsSearchOpen] = useState(false);      // 搜索框是否打开
+  const [searchQuery, setSearchQuery] = useState('');        // 搜索关键词
+  const [pendingDeleteTab, setPendingDeleteTab] = useState<TabData | null>(null);  // 待删除的文档
 
+  // 是否正在搜索
   const isSearching = searchQuery.trim().length > 0;
+  // 过滤后的文档列表
   const filteredTabs = tabs.filter(tab => 
     tab.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
     tab.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -142,16 +153,16 @@ export default function SideBar({
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="w-[min(92vw,26rem)] rounded-xl border border-outline-variant/20 bg-surface-highest/45 backdrop-blur-2xl shadow-2xl p-5"
             >
-              <div className="text-on-surface text-sm font-medium">删除文档？</div>
+              <div className="text-on-surface text-sm font-medium">Delete document?</div>
               <div className="text-on-surface-variant text-xs mt-2 leading-relaxed">
-                将删除本地文件：{pendingDeleteTab.title || 'Untitled Document'}。此操作不可撤销。
+                This will delete "{pendingDeleteTab.title || 'Untitled Document'}" locally. This action cannot be undone.
               </div>
               <div className="mt-5 flex items-center justify-end gap-2">
                 <button
                   onClick={() => setPendingDeleteTab(null)}
                   className="px-3 py-1.5 text-xs rounded-md text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-colors"
                 >
-                  取消
+                  Cancel
                 </button>
                 <button
                   onClick={() => {
@@ -160,7 +171,7 @@ export default function SideBar({
                   }}
                   className="px-3 py-1.5 text-xs rounded-md text-red-300 bg-red-500/15 hover:bg-red-500/25 transition-colors"
                 >
-                  确认删除
+                  Delete
                 </button>
               </div>
             </motion.div>

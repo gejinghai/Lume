@@ -1,5 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 
+/**
+ * RainBackground 雨滴背景组件
+ * 使用 WebGL 着色器渲染动态雨滴效果
+ * 包含雨滴下落、水面波纹等视觉效果
+ */
+
+// 顶点着色器 - 处理顶点位置
 const vertexShaderSource = `#version 300 es
 in vec4 a_position;
 void main() {
@@ -7,16 +14,19 @@ void main() {
 }
 `;
 
+// 片元着色器 - 渲染雨滴效果
 const fragmentShaderSource = `#version 300 es
 precision highp float;
 
-uniform vec3 iResolution;
-uniform float iTime;
-uniform vec4 iMouse;
-uniform sampler2D iChannel0;
+// 着色器 uniform 变量
+uniform vec3 iResolution;    // 画布分辨率
+uniform float iTime;         // 时间（用于动画）
+uniform vec4 iMouse;         // 鼠标位置
+uniform sampler2D iChannel0; // 纹理通道
 
 out vec4 fragColor;
 
+// 平滑过渡函数
 #define S(a, b, t) smoothstep(a, b, t)
 //#define CHEAP_NORMALS
 //#define HAS_HEART // Commented out to prevent the heart drawing and allow full rain effect

@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
+
+// 导入背景组件
 import RainBackground from './components/RainBackground';
 import SnowBackground from './components/SnowBackground';
 import StarsBackground from './components/StarsBackground';
 import AuroraBackground from './components/AuroraBackground';
+
+// 导入 UI 组件
 import TopBar from './components/TopBar';
 import SideBar from './components/SideBar';
 import Editor from './components/Editor';
@@ -11,41 +15,72 @@ import SettingsPanel from './components/SettingsPanel';
 import AmbientMusicPlayer from './components/AmbientMusicPlayer';
 import WelcomePage from './components/WelcomePage';
 
+/**
+ * 场景类型 - 定义可用的背景效果
+ * rain: 雨天效果
+ * snow: 雪天效果
+ * stars: 星空效果
+ * aurora: 极光效果
+ */
 export type SceneType = 'rain' | 'snow' | 'stars' | 'aurora';
 
+/**
+ * 文档数据接口 - 定义每个文档的结构
+ */
 export interface TabData {
-  id: string;
-  title: string;
-  subtitle: string;
-  content: string;
-  isSaved?: boolean;
+  id: string;          // 文档唯一标识符
+  title: string;       // 文档标题
+  subtitle: string;    // 文档副标题（日期）
+  content: string;     // 文档内容
+  isSaved?: boolean;   // 是否已保存
 }
 
+/**
+ * Lume 应用主组件
+ * 负责整个应用的状态管理和组件协调
+ */
 export default function App() {
-  const [isUIVisible, setIsUIVisible] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [fontFamily, setFontFamily] = useState<'sans' | 'serif'>('serif');
-  const [editorFontSize, setEditorFontSize] = useState(14);
-  const [scene, setScene] = useState<SceneType>('rain');
+  // ========== UI 可见性状态 ==========
+  const [isUIVisible, setIsUIVisible] = useState(true);           // 控制 UI 元素显示/隐藏
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);       // 侧边栏开关状态
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);      // 设置面板开关状态
+
+  // ========== 编辑器设置状态 ==========
+  const [fontFamily, setFontFamily] = useState<'sans' | 'serif'>('serif');  // 字体系列
+  const [editorFontSize, setEditorFontSize] = useState(14);       // 编辑器字体大小
+
+  // ========== 场景与背景状态 ==========
+  const [scene, setScene] = useState<SceneType>('rain');           // 当前场景类型
   
-  const [rainIntensity, setRainIntensity] = useState(0.6);
-  const [volume, setVolume] = useState(0.5);
-  const [thunderEnabled, setThunderEnabled] = useState(false);
-  const [starDensity, setStarDensity] = useState(400);
-  const [whiteNoiseEnabled, setWhiteNoiseEnabled] = useState(true);
-  const [ambientSoundsEnabled, setAmbientSoundsEnabled] = useState(true);
-  const [auroraCount, setAuroraCount] = useState(5);
+  // 天气效果参数
+  const [rainIntensity, setRainIntensity] = useState(0.6);         // 雨滴强度 (0-1)
+  const [thunderEnabled, setThunderEnabled] = useState(false);     // 雷声开关
+  
+  // 星空效果参数
+  const [starDensity, setStarDensity] = useState(400);            // 星星密度
+  
+  // 环境音设置
+  const [whiteNoiseEnabled, setWhiteNoiseEnabled] = useState(true);       // 白噪音开关
+  const [ambientSoundsEnabled, setAmbientSoundsEnabled] = useState(true);  // 环境音开关
+  const [volume, setVolume] = useState(0.5);                      // 音量大小 (0-1)
+  
+  // 极光效果参数
+  const [auroraCount, setAuroraCount] = useState(5);               // 极光数量
 
-  const [isLoading, setIsLoading] = useState(true);
+  // ========== 应用加载状态 ==========
+  const [isLoading, setIsLoading] = useState(true);              // 是否正在加载
 
-  const [documents, setDocuments] = useState<TabData[]>([]);
-  const [openTabIds, setOpenTabIds] = useState<string[]>([]);
-  const [activeTabId, setActiveTabId] = useState<string | null>(null);
+  // ========== 文档管理状态 ==========
+  const [documents, setDocuments] = useState<TabData[]>([]);       // 所有文档列表
+  const [openTabIds, setOpenTabIds] = useState<string[]>([]);      // 当前打开的标签页 ID 列表
+  const [activeTabId, setActiveTabId] = useState<string | null>(null);  // 当前活动标签页 ID
 
+  // 计算当前打开的标签页
   const openTabs = openTabIds
     .map(id => documents.find(doc => doc.id === id))
     .filter((tab): tab is TabData => Boolean(tab));
+  
+  // 获取当前活动标签页
   const activeTab = activeTabId ? documents.find(t => t.id === activeTabId) ?? null : null;
 
   const isElectron = typeof window !== 'undefined' && window.electronAPI;

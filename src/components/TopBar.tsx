@@ -2,30 +2,46 @@ import React, { useEffect, useRef } from 'react';
 import { Settings, PanelLeft, Type, CloudRain, Snowflake, Star, Waves, X, Plus, Circle } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 
+/**
+ * TopBarProps 顶部标签栏组件接口
+ */
 interface TopBarProps {
-  isUIVisible: boolean;
-  toggleSidebar: () => void;
-  toggleFont: () => void;
-  toggleSettings?: () => void;
-  fontFamily: 'sans' | 'serif';
-  editorFontSize: number;
-  onEditorFontSizeChange: (size: number) => void;
-  scene: 'rain' | 'snow' | 'stars' | 'aurora';
-  setScene: (scene: 'rain' | 'snow' | 'stars' | 'aurora') => void;
-  tabs: { id: string; title: string; subtitle: string; content: string; isSaved?: boolean }[];
-  activeTabId: string | null;
-  onReorderTabs: (newTabs: { id: string; title: string; subtitle: string; content: string; isSaved?: boolean }[]) => void;
-  onSelectTab: (id: string) => void;
-  onCloseTab: (id: string) => void;
-  onAddTab: () => void;
+  isUIVisible: boolean;                        // UI是否可见
+  toggleSidebar: () => void;                  // 切换侧边栏
+  toggleFont: () => void;                   // 切换字体
+  toggleSettings?: () => void;               // 切换设置面板
+  fontFamily: 'sans' | 'serif';            // 当前字体系列
+  editorFontSize: number;                     // 编辑器字体大小
+  onEditorFontSizeChange: (size: number) => void;  // 字体大小变更回调
+  scene: 'rain' | 'snow' | 'stars' | 'aurora';  // 当前场景类型
+  setScene: (scene: 'rain' | 'snow' | 'stars' | 'aurora') => void;  // 场景切换回调
+  tabs: {                                  // 标签页列表
+    id: string; 
+    title: string; 
+    subtitle: string; 
+    content: string; 
+    isSaved?: boolean 
+  }[];
+  activeTabId: string | null;               // 当前活动标签 ID
+  onReorderTabs: (newTabs: { id: string; title: string; subtitle: string; content: string; isSaved?: boolean }[]) => void;  // 标签排序回调
+  onSelectTab: (id: string) => void;        // 选择标签回调
+  onCloseTab: (id: string) => void;        // 关闭标签回调
+  onAddTab: () => void;                   // 新建标签回调
 }
 
+/**
+ * TopBar 顶部标签栏组件
+ * 显示文档标签页，支持拖拽排序、场景切换、字体设置
+ * 使用 Framer Motion 实现标签拖拽动画
+ */
 export default function TopBar({ 
   isUIVisible, toggleSidebar, toggleFont, toggleSettings, fontFamily, scene, setScene,
   editorFontSize, onEditorFontSizeChange,
   tabs, activeTabId, onReorderTabs, onSelectTab, onCloseTab, onAddTab
 }: TopBarProps) {
+  // 标签滚动区域引用
   const tabsScrollRef = useRef<HTMLDivElement>(null);
+  // 上一个标签数量引用（用于检测新标签）
   const prevTabCountRef = useRef(tabs.length);
 
   useEffect(() => {

@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+/**
+ * AuroraBackground 极光背景组件
+ * 使用 WebGL 着色器渲染动态极光效果
+ * 支持自定义极光数量
+ */
+
+// 顶点着色器 - 处理顶点位置
 const vertexShaderSource = `#version 300 es
 in vec4 a_position;
 void main() {
@@ -7,12 +14,13 @@ void main() {
 }
 `;
 
+// 片元着色器 - 渲染极光效果
 const fragmentShaderSource = `#version 300 es
 precision highp float;
 
-uniform vec3 iResolution;
-uniform float iTime;
-uniform float iAuroraCount;
+uniform vec3 iResolution;    // 画布分辨率
+uniform float iTime;         // 时间（用于动画）
+uniform float iAuroraCount;  // 极光数量
 
 out vec4 fragColor;
 
