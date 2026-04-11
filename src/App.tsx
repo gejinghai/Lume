@@ -9,6 +9,7 @@ import Editor from './components/Editor';
 import BottomBar from './components/BottomBar';
 import SettingsPanel from './components/SettingsPanel';
 import AmbientMusicPlayer from './components/AmbientMusicPlayer';
+import WelcomePage from './components/WelcomePage';
 
 export type SceneType = 'rain' | 'snow' | 'stars' | 'aurora';
 
@@ -72,28 +73,8 @@ export default function App() {
       if (documents && documents.length > 0) {
         const loadedDocuments = documents.map(d => ({ ...d, isSaved: true }));
         setDocuments(loadedDocuments);
-        if (documents[0].id) {
-          setOpenTabIds([documents[0].id]);
-          setActiveTabId(documents[0].id);
-        }
       } else {
-        const initialTab: TabData = {
-          id: Date.now().toString(),
-          title: 'Untitled Document',
-          subtitle: 'NEW DRAFT',
-          content: '',
-          isSaved: false
-        };
-        setDocuments([initialTab]);
-        setOpenTabIds([initialTab.id]);
-        setActiveTabId(initialTab.id);
-        await window.electronAPI.saveDocument({
-          id: initialTab.id,
-          title: initialTab.title,
-          subtitle: initialTab.subtitle,
-          content: initialTab.content
-        });
-        setDocuments(prev => prev.map(t => t.id === initialTab.id ? { ...t, isSaved: true } : t));
+        setDocuments([]);
       }
     } catch (error) {
       console.error('Failed to load documents:', error);
@@ -174,10 +155,16 @@ export default function App() {
   };
 
   const handleAddTab = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const defaultSubtitle = `${year}年${month}月${day}日`;
+
     const newTab: TabData = {
       id: Date.now().toString(),
       title: 'Untitled Document',
-      subtitle: 'NEW DRAFT',
+      subtitle: defaultSubtitle,
       content: '',
       isSaved: false
     };
@@ -342,19 +329,21 @@ export default function App() {
         }}
       >
         <div className="w-full max-w-4xl h-full flex flex-col items-center justify-center">
-          <Editor 
-            fontFamily={fontFamily} 
-            isUIVisible={isUIVisible || isSidebarOpen || isSettingsOpen} 
-            tab={activeTab}
-            fontSizePx={clampedEditorFontSize}
-            onUpdateTab={handleUpdateTab}
-            onSaveTab={() => {
-              const currentTab = activeTabId ? documents.find(t => t.id === activeTabId) : null;
-              if (currentTab) {
-                void saveDocument(currentTab);
-              }
-            }}
-          />
+          {activeTab ? (
+            <Editor 
+              fontFamily={fontFamily} 
+              isUIVisible={isUIVisible || isSidebarOpen || isSettingsOpen} 
+              tab={activeTab}
+              fontSizePx={clampedEditorFontSize}
+              onUpdateTab={handleUpdateTab}
+            />
+          ) : (
+            <WelcomePage 
+              onCreateDocument={handleAddTab}
+              onOpenDocument={() => setIsSidebarOpen(true)}
+              documentCount={documents.length}
+            />
+          )}
         </div>
       </main>
 

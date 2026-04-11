@@ -7,10 +7,9 @@ interface EditorProps {
   tab: { id: string; title: string; subtitle: string; content: string } | null;
   fontSizePx: number;
   onUpdateTab: (id: string, updates: Partial<{ title: string; subtitle: string; content: string }>) => void;
-  onSaveTab: () => void;
 }
 
-export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpdateTab, onSaveTab }: EditorProps) {
+export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpdateTab }: EditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isClearing, setIsClearing] = useState(false);
   const [clearingText, setClearingText] = useState('');
@@ -35,10 +34,6 @@ export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpd
     }, 1200);
   };
 
-  const handleSave = () => {
-    onSaveTab();
-  };
-
   if (!tab) {
     return (
       <div className="relative w-full h-full glass-panel rounded-xl overflow-hidden flex items-center justify-center">
@@ -51,7 +46,7 @@ export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpd
   }
 
   return (
-    <div className="relative w-full h-full glass-panel rounded-xl overflow-hidden flex flex-col items-center">
+    <div className="relative w-full h-full glass-panel rounded-xl overflow-hidden flex flex-col items-center pt-6 pb-6">
       <div className="w-full h-full overflow-y-auto custom-scrollbar-hidden p-12 md:p-20 flex flex-col items-center">
         <motion.div 
           className="mb-12 text-center w-full max-w-2xl flex-shrink-0"
@@ -63,14 +58,14 @@ export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpd
             type="text" 
             value={tab.title}
             onChange={(e) => onUpdateTab(tab.id, { title: e.target.value })}
-            className="bg-transparent text-primary text-3xl md:text-4xl font-light tracking-tighter mb-3 opacity-90 outline-none text-center w-full placeholder-outline-variant"
+            className="bg-transparent text-primary text-2xl md:text-3xl font-light tracking-tight mb-3 opacity-90 outline-none text-center w-full placeholder-outline-variant"
             placeholder="Untitled Document"
           />
           <input 
             type="text" 
             value={tab.subtitle}
             onChange={(e) => onUpdateTab(tab.id, { subtitle: e.target.value })}
-            className="bg-transparent text-on-surface-variant text-xs md:text-sm font-sans tracking-[0.2em] uppercase opacity-50 italic outline-none text-center w-full"
+            className="bg-transparent text-on-surface-variant text-xs font-sans tracking-[0.2em] uppercase opacity-50 italic outline-none text-center w-full"
             placeholder="Subtitle"
           />
         </motion.div>
@@ -121,30 +116,18 @@ export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpd
         </div>
       </div>
 
-      <AnimatePresence>
-        {isUIVisible && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
+      {/* {isUIVisible && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="absolute bottom-8 left-0 w-full px-12 md:px-20 flex justify-between items-center z-50 pointer-events-none"
+            onClick={handleClear}
+            className="absolute top-4 right-4 px-3 py-1.5 text-xs font-medium tracking-wider uppercase text-on-surface-variant hover:text-red-400 hover:bg-red-400/10 rounded-md transition-all z-50"
           >
-            <button 
-              onClick={handleClear}
-              className="pointer-events-auto px-4 py-2 text-xs font-medium tracking-wider uppercase text-on-surface-variant hover:text-red-400 hover:bg-red-400/10 rounded-md transition-all"
-            >
-              Clear
-            </button>
-            <button 
-              onClick={handleSave}
-              className="pointer-events-auto px-4 py-2 text-xs font-medium tracking-wider uppercase text-on-surface-variant hover:text-secondary hover:bg-secondary/10 rounded-md transition-all"
-            >
-              Save
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            Clear
+          </motion.button>
+        )} */}
     </div>
   );
 }
