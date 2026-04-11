@@ -33,6 +33,11 @@ export default function WelcomePage({ onCreateDocument, onOpenDocument, document
           transition={{ delay: 0.2, duration: 0.6 }}
           className="mb-8"
         >
+          <img 
+            src="./images/logo.png" 
+            alt="Lume Logo" 
+            className="w-24 h-24 mx-auto mb-6 object-contain opacity-50"
+          />
           <h1 className="text-primary text-4xl md:text-3xl font-light tracking-tight mb-2 opacity-90">
             Welcome to Lume
           </h1>

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import config from '../config.json';
 
 /**
  * 环境音乐播放器组件Props接口
@@ -21,8 +22,8 @@ export default function AmbientMusicPlayer({ volume, enabled }: AmbientMusicPlay
   const [playlist, setPlaylist] = useState<string[]>(['piano1.mp3']);  // 默认播放列表
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);      // 当前曲目索引
   
-  // 音乐资源基础 URL（腾讯云 COS）
-  const COS_BASE_URL = 'https://music-1379744664.cos.ap-guangzhou.myqcloud.com/light-music';
+  // 音乐资源基础 URL（从配置文件读取）
+  const COS_BASE_URL = config.music.baseUrl;
 
   // 组件挂载时获取播放列表
   useEffect(() => {
