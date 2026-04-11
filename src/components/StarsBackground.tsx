@@ -156,17 +156,6 @@ export default function StarsBackground({
       }
     }
 
-    // Big Dipper (北斗七星) relative coordinates (0 to 1)
-    const bigDipperCoords = [
-      { x: 0.75, y: 0.20 }, // Dubhe
-      { x: 0.82, y: 0.28 }, // Merak
-      { x: 0.70, y: 0.35 }, // Phecda
-      { x: 0.62, y: 0.30 }, // Megrez
-      { x: 0.50, y: 0.33 }, // Alioth
-      { x: 0.42, y: 0.38 }, // Mizar
-      { x: 0.30, y: 0.45 }  // Alkaid
-    ];
-
     let stars = Array.from({ length: starDensity }, () => new Star());
     const shootingStars = Array.from({ length: 4 }, () => new ShootingStar());
     let animationFrameId: number;
@@ -178,39 +167,6 @@ export default function StarsBackground({
       stars.forEach(star => {
         star.update();
         star.draw(ctx);
-      });
-
-      // Draw Big Dipper
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-      ctx.lineWidth = 1;
-      
-      // Draw lines connecting Big Dipper
-      ctx.beginPath();
-      bigDipperCoords.forEach((coord, index) => {
-        const px = coord.x * width;
-        const py = coord.y * height;
-        if (index === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      });
-      // Connect Megrez back to Dubhe to complete the bowl
-      ctx.lineTo(bigDipperCoords[0].x * width, bigDipperCoords[0].y * height);
-      ctx.stroke();
-
-      // Draw the 7 stars of Big Dipper
-      bigDipperCoords.forEach(coord => {
-        const px = coord.x * width;
-        const py = coord.y * height;
-        // Glow
-        ctx.beginPath();
-        ctx.arc(px, py, 4, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.fill();
-        // Core
-        ctx.beginPath();
-        ctx.arc(px, py, 1.5, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-        ctx.fill();
       });
 
       // Draw shooting stars

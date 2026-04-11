@@ -45,11 +45,12 @@
   }
 
   .custom-scrollbar-hidden::-webkit-scrollbar {
-    display: none;
+    display: none !important;
   }
   .custom-scrollbar-hidden {
     -ms-overflow-style: none;
     scrollbar-width: none;
+    scrollbar-color: transparent transparent;
   }
 }
 
