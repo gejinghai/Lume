@@ -102,8 +102,10 @@ Lume/
 │   └── preload.cjs          # 预加载脚本
 ├── public/                  # 静态资源
 │   ├── images/              # 图片资源
+│   ├── music/              # 本地音乐资源
 │   └── sounds/              # 音频资源
 ├── src/                     # React 源码
+│   ├── config.json          # 配置文件
 │   ├── components/          # UI 组件
 │   ├── App.tsx             # 主应用组件
 │   ├── index.css           # 全局样式
@@ -115,6 +117,50 @@ Lume/
 ├── vite.config.ts           # Vite 配置
 └── .gitignore              # Git 忽略配置
 ```
+
+## 配置文件
+
+配置文件位于 `src/config.json`，用于自定义应用设置：
+
+```json
+{
+  "app": {
+    "name": "Lume",
+    "version": "1.0.0"
+  },
+  "music": {
+    "baseUrl": ""
+  }
+}
+```
+
+**配置说明：**
+
+- `app.name`: 应用名称
+- `app.version`: 应用版本号
+- `music.baseUrl`: 音乐 CDN 地址（可选）
+  - **留空或删除**: 使用本地音乐（`public/music` 目录）
+  - **填写 CDN 地址**: 使用远程音乐（需要包含 `playlist.json` 和音乐文件）
+
+### 音乐配置示例
+
+本地音乐（默认）：
+```json
+"music": {
+  "baseUrl": ""
+}
+```
+
+远程 CDN 音乐：
+```json
+"music": {
+  "baseUrl": "https://your-cdn.com/music"
+}
+```
+
+本地音乐文件需放置在 `public/music/` 目录，包含：
+- `playlist.json` - 播放列表
+- `piano1.mp3`, `piano2.mp3` 等音乐文件
 
 ## 核心文件说明
 

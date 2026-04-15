@@ -22,24 +22,33 @@ export default function AmbientMusicPlayer({ volume, enabled }: AmbientMusicPlay
   const [playlist, setPlaylist] = useState<string[]>(['piano1.mp3']);  // 默认播放列表
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);      // 当前曲目索引
   
-  // 音乐资源基础 URL（从配置文件读取）
-  const COS_BASE_URL = config.music.baseUrl;
+  // 音乐资源基础 URL（优先使用配置文件中的 CDN 地址，否则使用本地音乐）
+  // 注意：需要检查是否为空字符串
+  const LOCAL_MUSIC_PATH = './music';
+  const remoteUrl = config.music?.baseUrl;
+  const COS_BASE_URL = remoteUrl && remoteUrl.trim() !== '' ? remoteUrl : null;
 
   // 组件挂载时获取播放列表
   useEffect(() => {
-    fetch(`${COS_BASE_URL}/playlist.json`)
-      .then(res => {
-        if (!res.ok) throw new Error('Playlist not found');
-        return res.json();
-      })
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setPlaylist(data);
-        }
-      })
-      .catch(err => {
-        console.log('Could not load playlist.json, falling back to default piano1.mp3', err);
-      });
+    const fetchPlaylist = () => {
+      const playlistUrl = COS_BASE_URL ? `${COS_BASE_URL}/playlist.json` : `${LOCAL_MUSIC_PATH}/playlist.json`;
+      
+      fetch(playlistUrl)
+        .then(res => {
+          if (!res.ok) throw new Error('Playlist not found');
+          return res.json();
+        })
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setPlaylist(data);
+          }
+        })
+        .catch(err => {
+          console.log('Could not load playlist.json, falling back to default piano1.mp3', err);
+        });
+    };
+    
+    fetchPlaylist();
   }, []);
 
   // 监听音量变化
@@ -70,7 +79,7 @@ export default function AmbientMusicPlayer({ volume, enabled }: AmbientMusicPlay
   return (
     <audio 
       ref={audioRef} 
-      src={`${COS_BASE_URL}/${playlist[currentTrackIndex]}`}
+      src={COS_BASE_URL ? `${COS_BASE_URL}/${playlist[currentTrackIndex]}` : `${LOCAL_MUSIC_PATH}/${playlist[currentTrackIndex]}`}
       onEnded={handleTrackEnd}
       crossOrigin="anonymous"
       autoPlay={enabled}

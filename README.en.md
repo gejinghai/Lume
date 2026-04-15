@@ -98,47 +98,69 @@ Note: This starts Vite dev server. For full Electron development, build first th
 ```
 Lume/
 ├── electron/                 # Electron main process
-│   ├── main.cjs             # Main process entry, handles window creation, menus, shortcuts
-│   └── preload.cjs          # Preload script, exposes safe API to renderer
+│   ├── main.cjs             # Main process entry
+│   └── preload.cjs          # Preload script
 ├── public/                  # Static assets
 │   ├── images/              # Image resources
-│   │   ├── logo.png         # Application icon
-│   │   ├── music.jpg        # Music cover image
-│   │   ├── rain.jpg         # Rain background image
-│   │   └── winter.jpg       # Winter background image
+│   ├── music/              # Local music resources
 │   └── sounds/              # Audio resources
-│       ├── cricket.mp3      # Cricket sound
-│       ├── nightsound.mp3   # Night ambient sound
-│       ├── rain.mp3         # Rain sound
-│       ├── thunder.mp3      # Thunder sound
-│       └── wind.mp3         # Wind sound
 ├── src/                     # React source code
+│   ├── config.json          # Configuration file
 │   ├── components/          # UI components
-│   │   ├── AmbientMusicPlayer.tsx  # Ambient music player, manages background music playback
-│   │   ├── AuroraBackground.tsx    # Aurora background animation component
-│   │   ├── BottomBar.tsx           # Bottom status bar, displays word count
-│   │   ├── Editor.tsx              # Text editor, core writing area
-│   │   ├── RainBackground.tsx       # Rain background animation component
-│   │   ├── SettingsPanel.tsx       # Settings panel, configures background, font, sound
-│   │   ├── SideBar.tsx             # Sidebar, document list management
-│   │   ├── SnowBackground.tsx      # Snow background animation component
-│   │   ├── StarsBackground.tsx     # Stars background animation component
-│   │   ├── TopBar.tsx              # Top tab bar, manages document tabs
-│   │   └── WelcomePage.tsx         # Welcome page, new user guide
-│   ├── App.tsx           # Main app component, state management and coordination
-│   ├── electron.d.ts     # Electron API type definitions
-│   ├── index.css         # Global styles, includes Tailwind and theme variables
-│   └── main.tsx         # React app entry
-├── index.html            # HTML entry file
-├── metadata.json         # Electron app metadata
-├── package.json          # Project config and dependencies
-├── scripts/              # Build scripts
-│   ├── build-dmg.sh      # One-click build script
-│   └── create-init-app.sh # Create first launch helper script
-├── tsconfig.json         # TypeScript config
-├── vite.config.ts        # Vite build config
-└── .gitignore           # Git ignore config
+│   ├── App.tsx             # Main app component
+│   ├── index.css           # Global styles
+│   └── main.tsx           # React entry
+├── index.html              # HTML entry
+├── package.json            # Project config
+├── scripts/                 # Build scripts
+├── tsconfig.json           # TypeScript config
+├── vite.config.ts           # Vite config
+└── .gitignore              # Git ignore config
 ```
+
+## Configuration
+
+The config file is located at `src/config.json`:
+
+```json
+{
+  "app": {
+    "name": "Lume",
+    "version": "1.0.0"
+  },
+  "music": {
+    "baseUrl": ""
+  }
+}
+```
+
+**Config Options:**
+
+- `app.name`: App name
+- `app.version`: App version
+- `music.baseUrl`: Music CDN URL (optional)
+  - **Empty**: Use local music (`public/music` folder)
+  - **CDN URL**: Use remote music (must include `playlist.json` and music files)
+
+### Music Config Examples
+
+Local music (default):
+```json
+"music": {
+  "baseUrl": ""
+}
+```
+
+Remote CDN music:
+```json
+"music": {
+  "baseUrl": "https://your-cdn.com/music"
+}
+```
+
+Local music files should be placed in `public/music/` folder:
+- `playlist.json` - Playlist file
+- `piano1.mp3`, `piano2.mp3` etc.
 
 ## Key Files
 
@@ -159,13 +181,14 @@ Lume/
 
 ### Config Files
 
-- **package.json**: Project dependencies and scripts with common commands:
+- **package.json**: Project dependencies and scripts:
   - `npm run dev` - Start dev server
   - `npm run build` - Build production version
   - `npm run electron:start` - Run Electron app
   - `npm run electron:build` - Package macOS app
-- **vite.config.ts**: Vite build config with base path and plugins
-- **tsconfig.json**: TypeScript compilation options
+- **config.json**: App configuration (music CDN settings)
+- **vite.config.ts**: Vite build config
+- **tsconfig.json**: TypeScript options
 
 ## Keyboard Shortcuts
 

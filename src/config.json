@@ -4,6 +4,6 @@
     "version": "1.0.0"
   },
   "music": {
-    "baseUrl": "https://music-1379744664.cos.ap-guangzhou.myqcloud.com/light-music"
+    "baseUrl": ""
   }
 }
