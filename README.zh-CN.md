@@ -1,5 +1,7 @@
 # Lume
 
+[English](README.md) | [中文](README.zh-CN.md)
+
 一款为 macOS 设计的极简沉浸式写作应用，基于 Electron 和 React 构建。
 
 ## 功能特性
