@@ -6,9 +6,9 @@ import { Plus, FolderOpen } from 'lucide-react';
  * WelcomePageProps 欢迎页组件接口
  */
 interface WelcomePageProps {
-  onCreateDocument: () => void;   // 新建文档回调
-  onOpenDocument: () => void;     // 打开文档回调
-  documentCount: number;          // 已有文档数量
+  onCreateDocument: () => void;
+  onOpenDocument: () => void;
+  documentCount: number;
 }
 
 /**
@@ -50,8 +50,8 @@ export default function WelcomePage({ onCreateDocument, onOpenDocument, document
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <p className="text-on-surface-variant text-xs opacity-70">
-              You have <span className="text-primary font-medium">{documentCount}</span> document{documentCount > 1 ? 's' : ''}
+            <p className="text-primary text-xs opacity-70">
+              You have <span className="font-medium">{documentCount}</span> document{documentCount > 1 ? 's' : ''}
             </p>
           </motion.div>
         )}
@@ -86,7 +86,7 @@ export default function WelcomePage({ onCreateDocument, onOpenDocument, document
         </motion.div>
 
         <motion.p 
-          className="mt-10 text-on-surface-variant text-xs opacity-40"
+          className="mt-10 text-primary text-xs opacity-40"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}

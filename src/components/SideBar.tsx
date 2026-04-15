@@ -193,10 +193,10 @@ function TabItem({ tab, isActive, onSelect, onDelete }: { tab: TabData, isActive
       }`}
     >
       <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center space-x-2 overflow-hidden">
+        <div className="flex items-center space-x-2 overflow-hidden flex-1 min-w-0">
           <Circle className={`w-2 h-2 flex-shrink-0 ${tab.isSaved ? 'fill-transparent text-transparent' : 'fill-secondary text-secondary'}`} />
           <FileText className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-secondary' : 'opacity-50'}`} />
-          <span className="text-sm font-medium truncate">{tab.title || 'Untitled Document'}</span>
+          <span className="text-sm font-medium truncate min-w-0 mr-6">{tab.title || 'Untitled Document'}</span>
         </div>
         <button 
           onClick={(e) => { e.stopPropagation(); onDelete(); }}

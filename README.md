@@ -1,178 +1,143 @@
 # Lume
 
-一款为 macOS 设计的极简沉浸式写作应用，基于 Electron 和 React 构建。
+A minimalist immersive writing app for macOS, built with Electron and React.
 
-## 功能特性
+## Features
 
-- **沉浸式写作体验**：全屏写作模式，搭配动态背景效果
-- **标签式文档管理**：支持多文档标签，可拖拽排序
-- **侧边栏文档列表**：快速访问所有文档，支持搜索功能
-- **动态背景效果**：可选雨、雪、星星、极光四种背景
-- **黑暗模式**：精美的暗色主题，带有玻璃态效果
-- **自动保存**：文档自动保存到本地存储
+- **Immersive Writing Experience**: Fullscreen writing mode with dynamic background effects
+- **Tab-based Document Management**: Multiple document tabs with drag-to-reorder
+- **Sidebar Document List**: Quick access to all documents with search functionality
+- **Dynamic Backgrounds**: Choose from Rain, Snow, Stars, or Aurora effects
+- **Dark Mode**: Beautiful dark theme with glassmorphism effects
+- **Auto-save**: Documents automatically saved to local storage
 
-## 快速开始
+## Quick Start
 
-### 环境要求
+### Requirements
 
 - Node.js 18+
 - npm 9+
 
-### 安装
+### Installation
 
-1. 克隆仓库：
+1. Clone the repository:
 
 ```bash
 git clone https://github.com/gejinghai/Lume.git
 ```
 
-2. 安装依赖：
+2. Install dependencies:
 
 ```bash
 cd Lume
 npm install
 ```
 
-3. 构建应用：
+3. Build:
 
 ```bash
 npm run build
 ```
 
-### 运行
+### Run
 
-启动 Electron 应用：
+Start the Electron app:
 
 ```bash
 npm run electron:start
 ```
 
-### 打包
+### Build
 
-构建 macOS 应用：
+Build macOS app:
 
 ```bash
 npm run electron:build
 ```
 
-使用国内镜像打包（适用于中国大陆网络环境）：
+Build with China mirror (for Chinese network):
 
 ```bash
 npm run electron:build:cn
 ```
 
-一键打包脚本（推荐）：
+One-click build script (recommended):
 
 ```bash
 cd scripts
 ./build-dmg.sh
 ```
 
-打包完成后，DMG 文件中会包含：
-- **Lume.app** - 主应用程序
-- **InitLume.app** - 首次启动助手，用于移除安全限制
-- **安装说明.txt** - 安装步骤说明
-- **Applications** - 快捷方式，指向系统应用程序文件夹
+After building, the DMG file contains:
+- **Lume.app** - Main application
+- **InitLume.app** - First launch helper to remove security restrictions
+- **Installation Guide.txt** - Installation instructions
+- **Applications** - Shortcut to Applications folder
 
-**安装步骤：**
+**Installation Steps:**
 
-1. 打开 DMG 文件
-2. 将 Lume.app 拖入「应用程序」文件夹
-3. 双击运行 **首次启动助手 (InitLume.app)** 移除安全限制
-4. 然后即可正常打开 Lume
+1. Open DMG file
+2. Drag Lume.app to Applications folder
+3. Run **InitLume.app** to remove security restrictions
+4. Launch Lume normally
 
-### 开发模式
+### Development
 
-热重载开发：
+Hot reload development:
 
 ```bash
 npm run dev
 ```
 
-注意：这会启动 Vite 开发服务器。完整的 Electron 开发需要先构建，然后使用 `npm run electron:start` 运行。
+Note: This starts Vite dev server. For full Electron development, build first then run `npm run electron:start`.
 
-## 项目结构
+## Project Structure
 
 ```
 Lume/
-├── electron/                 # Electron 主进程
-│   ├── main.cjs             # 主进程入口，负责窗口管理、菜单、快捷键、文件读写
-│   └── preload.cjs          # 预加载脚本，暴露安全的 API 给渲染进程
-├── public/                  # 静态资源
-│   ├── images/              # 图片资源
-│   │   ├── logo.png         # 应用图标
-│   │   ├── music.jpg        # 音乐封面图
-│   │   ├── rain.jpg         # 雨天背景图
-│   │   └── winter.jpg       # 冬季背景图
-│   └── sounds/              # 音频资源
-│       ├── cricket.mp3      # 蟋蟀声
-│       ├── nightsound.mp3   # 夜晚环境音
-│       ├── rain.mp3         # 雨声
-│       ├── thunder.mp3      # 雷声
-│       └── wind.mp3         # 风声
-├── src/                     # React 源码
-│   ├── components/          # UI 组件
-│   │   ├── AmbientMusicPlayer.tsx  # 环境音乐播放器，管理背景音乐播放
-│   │   ├── AuroraBackground.tsx    # 极光背景动画组件
-│   │   ├── BottomBar.tsx           # 底部状态栏，显示字数统计
-│   │   ├── Editor.tsx              # 文本编辑器，核心写作区域
-│   │   ├── RainBackground.tsx       # 雨滴背景动画组件
-│   │   ├── SettingsPanel.tsx       # 设置面板，配置背景、字体、音效等
-│   │   ├── SideBar.tsx             # 侧边栏，文档列表管理
-│   │   ├── SnowBackground.tsx      # 雪花背景动画组件
-│   │   ├── StarsBackground.tsx     # 星星背景动画组件
-│   │   ├── TopBar.tsx              # 顶部标签栏，管理文档标签
-│   │   └── WelcomePage.tsx         # 欢迎页，新用户引导
-│   ├── App.tsx           # 主应用组件，状态管理和组件协调
-│   ├── electron.d.ts     # Electron API 类型定义
-│   ├── index.css         # 全局样式，包含 Tailwind 和主题变量
-│   └── main.tsx         # React 应用入口
-├── index.html            # HTML 入口文件
-├── metadata.json         # Electron 应用元数据
-├── package.json          # 项目配置和依赖
-├── scripts/              # 打包脚本
-│   ├── build-dmg.sh      # 一键打包脚本
-│   └── create-init-app.sh # 创建首次启动助手脚本
-├── tsconfig.json         # TypeScript 配置
-├── vite.config.ts        # Vite 构建配置
-└── .gitignore           # Git 忽略配置
+├── electron/                 # Electron main process
+│   ├── main.cjs             # Main process entry
+│   └── preload.cjs          # Preload script
+├── public/                  # Static assets
+│   ├── images/              # Images
+│   └── sounds/             # Audio files
+├── src/                     # React source
+│   ├── components/         # UI components
+│   ├── App.tsx             # Main app component
+│   ├── index.css           # Global styles
+│   └── main.tsx            # React entry
+├── index.html              # HTML entry
+├── package.json            # Project config
+├── scripts/                # Build scripts
+├── tsconfig.json           # TypeScript config
+├── vite.config.ts          # Vite config
+└── .gitignore             # Git ignore
 ```
 
-## 核心文件说明
+## Key Files
 
-### Electron 主进程 (electron/)
+### Electron
 
-- **main.cjs**: 应用入口，负责创建窗口、处理菜单、注册快捷键、管理文件读写操作
-- **preload.cjs**: 预加载脚本，在渲染进程和主进程之间建立安全的通信桥梁
+- **main.cjs**: App entry, creates windows, handles menus and shortcuts
+- **preload.cjs**: Bridge between main and renderer processes
 
-### React 组件 (src/components/)
+### Components
 
-- **Editor.tsx**: 核心编辑器组件，支持标题、副标题和正文编辑
-- **WelcomePage.tsx**: 欢迎页，当没有打开文档时显示
-- **SideBar.tsx**: 侧边栏，显示所有文档列表，支持搜索和删除
-- **TopBar.tsx**: 顶部标签栏，显示当前打开的文档标签
-- **SettingsPanel.tsx**: 设置面板，调节背景效果、音量、字体等
-- **BottomBar.tsx**: 底部状态栏，显示字数和字符数统计
-- **Background 组件**: Rain、Snow、Stars、Aurora 四种动态背景效果
+- **Editor.tsx**: Core editor with title, subtitle and content
+- **WelcomePage.tsx**: Welcome screen when no document is open
+- **SideBar.tsx**: Document list with search
+- **TopBar.tsx**: Tab bar for open documents
+- **SettingsPanel.tsx**: Settings for backgrounds, volume, fonts
+- **BottomBar.tsx**: Status bar with word count
 
-### 配置文件
+## Keyboard Shortcuts
 
-- **package.json**: 项目依赖和脚本命令，包含以下常用命令：
-  - `npm run dev` - 启动开发服务器
-  - `npm run build` - 构建生产版本
-  - `npm run electron:start` - 运行 Electron 应用
-  - `npm run electron:build` - 打包 macOS 应用
-- **vite.config.ts**: Vite 构建配置，包含 base 路径和插件配置
-- **tsconfig.json**: TypeScript 编译选项
+- `Cmd+N` - New document
+- `Cmd+S` - Save document
+- `Cmd+W` - Close tab
+- `Cmd+Shift+S` - Toggle sidebar
 
-## 快捷键
-
-- `Cmd+N` - 新建文档
-- `Cmd+S` - 保存文档
-- `Cmd+W` - 关闭标签
-- `Cmd+Shift+S` - 切换侧边栏
-
-## 技术栈
+## Tech Stack
 
 - Electron 33
 - React 19
@@ -181,6 +146,6 @@ Lume/
 - Framer Motion
 - TypeScript
 
-## 许可证
+## License
 
 MIT
