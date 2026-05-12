@@ -68,6 +68,7 @@ One-click build script (recommended):
 ```bash
 cd scripts
 ./build-dmg.sh
+./build-win.sh
 ```
 
 After building, the DMG file contains:

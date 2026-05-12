@@ -2,6 +2,7 @@
   "name": "lume",
   "version": "1.0.0",
   "description": "A minimalist immersive writing application for macOS",
+  "author": "Lume Team",
   "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
@@ -45,7 +46,7 @@
   "build": {
     "appId": "com.lume.app",
     "productName": "Lume",
-    "icon": "public/images/logo.png",
+    "icon": "public/images/logo.ico",
     "directories": {
       "output": "release"
     },
@@ -65,7 +66,23 @@
       "icon": "public/images/logo.png"
     },
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "public/images/logo.ico",
+      "artifactName": "${productName} Setup ${version}.${ext}"
+    },
+    "nsis": {
+      "installerIcon": "public/images/logo.ico",
+      "uninstallerIcon": "public/images/logo.ico",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Lume"
     },
     "linux": {
       "target": "AppImage"

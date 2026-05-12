@@ -13,6 +13,12 @@
 - **黑暗模式**：精美的暗色主题，带有玻璃态效果
 - **自动保存**：文档自动保存到本地存储
 
+
+## 截图
+
+
+
+
 ## 快速开始
 
 ### 环境要求
@@ -63,12 +69,20 @@ npm run electron:build
 npm run electron:build:cn
 ```
 
-一键打包脚本（推荐）：
+Mac 一键打包脚本（推荐）：
 
 ```bash
 cd scripts
 ./build-dmg.sh
 ```
+
+Win 一键打包脚本（推荐）：
+
+```bash
+cd scripts
+./build-win.sh
+```
+
 
 打包完成后，DMG 文件中会包含：
 - **Lume.app** - 主应用程序
