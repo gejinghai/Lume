@@ -144,7 +144,10 @@ export default function App() {
 
   useEffect(() => {
     loadDocuments();
-    loadCustomConfig(); // 加载自定义资源配置
+    loadCustomConfig().then(() => {
+      // 自定义资源加载完成后强制重挂载背景组件，使自定义图片/音效生效
+      setCustomVersion(v => v + 1);
+    });
   }, [loadDocuments]);
 
   useEffect(() => {
