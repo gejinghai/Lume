@@ -30,21 +30,28 @@ interface SettingsPanelProps {
 }
 
 interface ResourceItem {
-  type: 'sounds' | 'images' | 'music';
+  type: 'sounds' | 'images';
   name: string;
   label: string;
-  defaultExt: string;
 }
 
-const RESOURCES: ResourceItem[] = [
-  { type: 'sounds', name: 'rain',       label: 'Rain (White Noise)', defaultExt: '.mp3' },
-  { type: 'sounds', name: 'wind',       label: 'Wind',              defaultExt: '.mp3' },
-  { type: 'sounds', name: 'thunder',    label: 'Thunder',           defaultExt: '.mp3' },
-  { type: 'sounds', name: 'nightsound', label: 'Night Sound',       defaultExt: '.mp3' },
-  { type: 'sounds', name: 'cricket',    label: 'Cricket',           defaultExt: '.mp3' },
-  { type: 'images', name: 'rain',       label: 'Rain Background',   defaultExt: '.jpg' },
-  { type: 'images', name: 'winter',     label: 'Winter Background', defaultExt: '.jpg' },
-];
+// 每个场景只能修改当前模式下的音效和背景图
+const SCENE_RESOURCES: Record<string, ResourceItem[]> = {
+  rain: [
+    { type: 'sounds', name: 'rain',    label: 'Rain Sound' },
+    { type: 'sounds', name: 'thunder', label: 'Thunder' },
+    { type: 'images', name: 'rain',    label: 'Background Image' },
+  ],
+  snow: [
+    { type: 'sounds', name: 'wind',   label: 'Wind Sound' },
+    { type: 'images', name: 'winter', label: 'Background Image' },
+  ],
+  stars: [
+    { type: 'sounds', name: 'nightsound', label: 'Night Sound' },
+    { type: 'sounds', name: 'cricket',    label: 'Cricket' },
+  ],
+  aurora: [],
+};
 
 const ICONS: Record<string, React.ReactNode> = {
   sounds: <Music className="w-3.5 h-3.5" />,
@@ -64,6 +71,7 @@ export default function SettingsPanel({
 }: SettingsPanelProps) {
   const isWeatherScene = scene === 'rain' || scene === 'snow';
   const isElectron = typeof window !== 'undefined' && window.electronAPI;
+  const sceneResources = SCENE_RESOURCES[scene] ?? [];
 
   // 自定义资源状态
   const [customOpen, setCustomOpen] = useState(false);
@@ -151,7 +159,7 @@ export default function SettingsPanel({
 
   const handleResetAll = async () => {
     if (!isElectron) return;
-    for (const res of RESOURCES) {
+    for (const res of sceneResources) {
       await window.electronAPI.deleteCustomResource({ type: res.type, name: res.name });
     }
     const config = await window.electronAPI.getCustomConfig();
@@ -341,7 +349,8 @@ export default function SettingsPanel({
                     className="overflow-hidden"
                   >
                     <div className="px-5 pb-4 space-y-2">
-                      {RESOURCES.map((res) => {
+                      {sceneResources.length > 0 ? (
+                        sceneResources.map((res) => {
                         const customFile = getCustomFileName(res);
                         const isLoading = loadingRes === `${res.type}/${res.name}`;
 
@@ -379,7 +388,12 @@ export default function SettingsPanel({
                             </div>
                           </div>
                         );
-                      })}
+                      })
+                      ) : (
+                        <div className="py-4 text-center text-[11px] text-outline-variant">
+                          No replaceable resources for this scene
+                        </div>
+                      )}
 
                       <div className="flex items-center space-x-2 pt-3 border-t border-outline-variant/10">
                         <button
@@ -389,13 +403,15 @@ export default function SettingsPanel({
                           <FolderOpen className="w-3 h-3" />
                           <span>Open Folder</span>
                         </button>
-                        <button
-                          onClick={handleResetAll}
-                          className="flex items-center space-x-1.5 px-3 py-1.5 text-[10px] rounded-md bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-red-400 transition-colors"
-                        >
-                          <RotateCcw className="w-3 h-3" />
-                          <span>Restore All</span>
-                        </button>
+                        {sceneResources.length > 0 && (
+                          <button
+                            onClick={handleResetAll}
+                            className="flex items-center space-x-1.5 px-3 py-1.5 text-[10px] rounded-md bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-red-400 transition-colors"
+                          >
+                            <RotateCcw className="w-3 h-3" />
+                            <span>Restore All</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </motion.div>
