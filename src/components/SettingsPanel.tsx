@@ -4,7 +4,7 @@ import {
   X, Volume2, CloudRain, Zap, Snowflake, Star, Moon, Sparkles,
   ChevronDown, ChevronRight, Music, Image, FolderOpen, RotateCcw,
 } from 'lucide-react';
-import { loadCustomConfig, getCustomConfig } from '../lib/assetResolver';
+import { loadCustomConfig, getCustomConfig, reloadCustomConfig } from '../lib/assetResolver';
 
 /**
  * SettingsPanelProps 设置面板组件接口
@@ -120,8 +120,9 @@ export default function SettingsPanel({
       });
 
       if (importResult.success) {
-        // 刷新配置
-        const config = await window.electronAPI.getCustomConfig();
+        // 刷新 module 级缓存和组件状态
+        await reloadCustomConfig();
+        const config = getCustomConfig();
         setCustomFiles({
           sounds: config.sounds ?? {},
           images: config.images ?? {},
@@ -142,7 +143,8 @@ export default function SettingsPanel({
 
     try {
       await window.electronAPI.deleteCustomResource({ type: res.type, name: res.name });
-      const config = await window.electronAPI.getCustomConfig();
+      await reloadCustomConfig();
+      const config = getCustomConfig();
       setCustomFiles({
         sounds: config.sounds ?? {},
         images: config.images ?? {},
@@ -166,7 +168,8 @@ export default function SettingsPanel({
     for (const res of sceneResources) {
       await window.electronAPI.deleteCustomResource({ type: res.type, name: res.name });
     }
-    const config = await window.electronAPI.getCustomConfig();
+    await reloadCustomConfig();
+    const config = getCustomConfig();
     setCustomFiles({
       sounds: config.sounds ?? {},
       images: config.images ?? {},

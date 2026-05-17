@@ -499,3 +499,25 @@ ipcMain.handle('open-folder', async (event, folderPath) => {
     return { success: false, error: error.message };
   }
 });
+ipcMain.handle('read-custom-asset-dataurl', async (event, { type, name }) => {
+  try {
+    const config = readCustomConfig();
+    const fileName = config[type]?.[name];
+    if (!fileName) return null;
+
+    const filePath = path.join(app.getPath('userData'), 'custom', type, fileName);
+    if (!fs.existsSync(filePath)) return null;
+
+    const ext = path.extname(fileName).slice(1).toLowerCase();
+    const mimeMap = {
+      mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg',
+      m4a: 'audio/mp4', flac: 'audio/flac', aac: 'audio/aac',
+      jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp',
+    };
+    const mime = mimeMap[ext] || 'application/octet-stream';
+    const data = fs.readFileSync(filePath);
+    return `data:${mime};base64,${data.toString('base64')}`;
+  } catch (e) {
+    return null;
+  }
+});

@@ -27,6 +27,7 @@ export interface ElectronAPI {
   deleteCustomResource: (data: { type: string; name: string }) => Promise<{ success: boolean; error?: string }>;
   getCustomFolderPath: () => Promise<string>;
   openFolder: (folderPath: string) => Promise<{ success: boolean; error?: string }>;
+  readCustomAssetDataUrl: (data: { type: string; name: string }) => Promise<string | null>;
   
   onNewDocument: (callback: () => void) => void;
   onNewWindow: (callback: () => void) => void;

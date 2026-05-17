@@ -49,6 +49,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteCustomResource: (data) => ipcRenderer.invoke('delete-custom-resource', data),
   getCustomFolderPath: () => ipcRenderer.invoke('get-custom-folder-path'),
   openFolder: (folderPath) => ipcRenderer.invoke('open-folder', folderPath),
+  readCustomAssetDataUrl: (data) => ipcRenderer.invoke('read-custom-asset-dataurl', data),
 
   // 移除所有监听器
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel)
