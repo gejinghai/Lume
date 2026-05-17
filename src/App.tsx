@@ -142,10 +142,12 @@ export default function App() {
       const [docs] = await Promise.all([
         loadDocuments(),
         loadCustomConfig(),
-        preloadSceneAudio('rain'), // 预解码雨景音效，避免阻塞主线程
       ]);
       setDocuments(docs);
       setIsLoading(false);
+
+      // 音频预加载在 UI 渲染之后进行，不阻塞启动
+      preloadSceneAudio('rain').catch(() => {});
     };
     init();
   }, [loadDocuments]);
