@@ -36,9 +36,19 @@ export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpd
   // 监听内容变化，自动调整文本域高度
   useEffect(() => {
     if (!tab) return;
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    // 保存外层滚动容器的滚动位置，防止 height='auto' 重置后跳动到顶部
+    const scrollContainer = textarea.parentElement?.parentElement as HTMLElement | null;
+    const prevScrollTop = scrollContainer?.scrollTop ?? 0;
+
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+
+    // 恢复滚动位置
+    if (scrollContainer) {
+      scrollContainer.scrollTop = prevScrollTop;
     }
   }, [tab?.content]);
 
