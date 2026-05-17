@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useGaplessAudio } from '../lib/useGaplessAudio';
 
 /**
  * RainBackground 雨滴背景组件
@@ -233,28 +234,10 @@ export default function RainBackground({
   whiteNoiseEnabled = true
 }: RainBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rainAudioRef = useRef<HTMLAudioElement>(null);
-  const thunderAudioRef = useRef<HTMLAudioElement>(null);
 
-  // Handle Audio
-  useEffect(() => {
-    if (rainAudioRef.current) {
-      rainAudioRef.current.volume = volume;
-      if (whiteNoiseEnabled) {
-        rainAudioRef.current.play().catch(e => console.log('Rain audio autoplay blocked:', e));
-      } else {
-        rainAudioRef.current.pause();
-      }
-    }
-    if (thunderAudioRef.current) {
-      thunderAudioRef.current.volume = volume;
-      if (thunderEnabled && whiteNoiseEnabled) {
-        thunderAudioRef.current.play().catch(e => console.log('Thunder audio autoplay blocked:', e));
-      } else {
-        thunderAudioRef.current.pause();
-      }
-    }
-  }, [volume, thunderEnabled, whiteNoiseEnabled]);
+  // 使用 Web Audio API 实现无缝循环（解决 <audio loop> 的 1-2s gap）
+  useGaplessAudio('./sounds/rain.mp3', volume, whiteNoiseEnabled);
+  useGaplessAudio('./sounds/thunder.mp3', volume, thunderEnabled && whiteNoiseEnabled);
 
   // Handle WebGL Shader
   useEffect(() => {
@@ -416,22 +399,9 @@ export default function RainBackground({
 
   return (
     <>
-      <canvas 
-        ref={canvasRef} 
+      <canvas
+        ref={canvasRef}
         className="fixed inset-0 z-0 w-full h-full pointer-events-none"
-      />
-      {/* Rain audio track (always playing) */}
-      <audio 
-        ref={rainAudioRef} 
-        src="./sounds/rain.mp3"
-        loop 
-        autoPlay
-      />
-      {/* Thunder audio track (conditional) */}
-      <audio 
-        ref={thunderAudioRef} 
-        src="./sounds/thunder.mp3"
-        loop 
       />
     </>
   );

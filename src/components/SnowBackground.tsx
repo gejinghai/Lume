@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useGaplessAudio } from '../lib/useGaplessAudio';
 
 /**
  * SnowBackground 雪花背景组件
@@ -75,19 +76,9 @@ export default function SnowBackground({
   whiteNoiseEnabled = true
 }: SnowBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Handle Audio
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-      if (whiteNoiseEnabled) {
-        audioRef.current.play().catch(e => console.log('Snow audio autoplay blocked:', e));
-      } else {
-        audioRef.current.pause();
-      }
-    }
-  }, [volume, whiteNoiseEnabled]);
+  // 使用 Web Audio API 实现无缝循环（解决 <audio loop> 的 1-2s gap）
+  useGaplessAudio('./sounds/wind.mp3', volume, whiteNoiseEnabled);
 
   // Handle WebGL Shader
   useEffect(() => {
@@ -199,13 +190,6 @@ export default function SnowBackground({
       <canvas 
         ref={canvasRef} 
         className="absolute inset-0 w-full h-full mix-blend-screen opacity-80" 
-      />
-      {/* Snow audio track (wind/snow sound) */}
-      <audio 
-        ref={audioRef} 
-        src="./sounds/wind.mp3"
-        loop 
-        autoPlay
       />
     </div>
   );

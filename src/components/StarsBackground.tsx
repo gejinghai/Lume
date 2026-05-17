@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useGaplessAudio } from '../lib/useGaplessAudio';
 
 /**
  * StarsBackgroundProps 接口
@@ -21,29 +22,10 @@ export default function StarsBackground({
 }: StarsBackgroundProps) {
   // Canvas 引用
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  // 音频引用
-  const audioRef1 = useRef<HTMLAudioElement>(null);
-  const audioRef2 = useRef<HTMLAudioElement>(null);
 
-  // Handle Audio
-  useEffect(() => {
-    if (audioRef1.current) {
-      audioRef1.current.volume = volume * 0.6;
-      if (whiteNoiseEnabled) {
-        audioRef1.current.play().catch(e => console.log('Audio autoplay blocked:', e));
-      } else {
-        audioRef1.current.pause();
-      }
-    }
-    if (audioRef2.current) {
-      audioRef2.current.volume = volume * 0.4;
-      if (whiteNoiseEnabled) {
-        audioRef2.current.play().catch(e => console.log('Audio autoplay blocked:', e));
-      } else {
-        audioRef2.current.pause();
-      }
-    }
-  }, [volume, whiteNoiseEnabled]);
+  // 使用 Web Audio API 实现无缝循环（解决 <audio loop> 的 1-2s gap）
+  useGaplessAudio('./sounds/nightsound.mp3', volume * 0.6, whiteNoiseEnabled);
+  useGaplessAudio('./sounds/cricket.mp3', volume * 0.4, whiteNoiseEnabled);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -213,17 +195,6 @@ export default function StarsBackground({
   return (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-black">
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full opacity-100 mix-blend-screen" />
-      {/* Night Sounds */}
-      <audio 
-        ref={audioRef1} 
-        src="./sounds/nightsound.mp3"
-        loop 
-      />
-      <audio 
-        ref={audioRef2} 
-        src="./sounds/cricket.mp3"
-        loop 
-      />
     </div>
   );
 }
