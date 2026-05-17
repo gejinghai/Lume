@@ -248,13 +248,16 @@ ipcMain.handle('save-document', async (event, { id, title, subtitle, content }) 
 ipcMain.handle('load-documents', async () => {
   const userDataPath = app.getPath('userData');
   const documentsPath = path.join(userDataPath, 'documents');
-  
+
   if (!fs.existsSync(documentsPath)) {
     return [];
   }
-  
+
   const files = fs.readdirSync(documentsPath).filter(f => f.endsWith('.md') || f.endsWith('.json'));
   const documents = files.map(file => {
+    // 跳过 _order.json（文档排序文件，不是文档）
+    if (file === '_order.json') return null;
+
     const fullPath = path.join(documentsPath, file);
     const raw = fs.readFileSync(fullPath, 'utf-8');
 
@@ -274,9 +277,42 @@ ipcMain.handle('load-documents', async () => {
 
     const fallbackId = path.basename(file, '.md');
     return parseMarkdownDocument(raw, fallbackId);
-  });
-  
+  }).filter(Boolean);
+
+  // 读取保存的文档顺序，按顺序排序
+  const orderPath = path.join(documentsPath, '_order.json');
+  try {
+    if (fs.existsSync(orderPath)) {
+      const orderData = JSON.parse(fs.readFileSync(orderPath, 'utf-8'));
+      if (Array.isArray(orderData)) {
+        const docMap = new Map(documents.map(d => [d.id, d]));
+        // 按 order 排序，不在 order 中的文档排在末尾
+        const ordered = orderData.map(id => docMap.get(id)).filter(Boolean);
+        const unordered = documents.filter(d => !orderData.includes(d.id));
+        return [...ordered, ...unordered];
+      }
+    }
+  } catch (e) {
+    // 忽略 order 文件读取错误，使用默认顺序
+  }
+
   return documents;
+});
+
+ipcMain.handle('save-documents-order', async (event, order) => {
+  const userDataPath = app.getPath('userData');
+  const documentsPath = path.join(userDataPath, 'documents');
+
+  if (!fs.existsSync(documentsPath)) {
+    fs.mkdirSync(documentsPath, { recursive: true });
+  }
+
+  fs.writeFileSync(
+    path.join(documentsPath, '_order.json'),
+    JSON.stringify(order),
+    'utf-8'
+  );
+  return true;
 });
 
 ipcMain.handle('delete-document', async (event, id) => {

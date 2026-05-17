@@ -189,6 +189,14 @@ export default function App() {
     setDocuments(prev => prev.map(t => t.id === id ? { ...t, ...updates, isSaved: false } : t));
   };
 
+  const handleReorderDocuments = (reordered: TabData[]) => {
+    setDocuments(reordered);
+    // 持久化文档顺序，下次启动保持
+    if (isElectron) {
+      window.electronAPI.saveDocumentsOrder(reordered.map(d => d.id));
+    }
+  };
+
   const handleAddTab = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -276,7 +284,7 @@ export default function App() {
   }
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-surface text-on-surface font-sans">
+    <div className="relative w-full h-screen overflow-hidden bg-surface text-on-surface font-sans select-none">
       {scene === 'rain' && (
         <RainBackground 
           intensity={rainIntensity} 
@@ -332,7 +340,7 @@ export default function App() {
         onSelectTab={openDocument}
         onDeleteTab={handleDeleteDocument}
         onAddTab={handleAddTab}
-        onReorderTabs={setDocuments}
+        onReorderTabs={handleReorderDocuments}
       />
 
       <SettingsPanel 

@@ -9,6 +9,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 // 通过 contextBridge 暴露安全的 API 到渲染进程
 contextBridge.exposeInMainWorld('electronAPI', {
   // ========== 文件操作 API ==========
+  saveDocumentsOrder: (order) => ipcRenderer.invoke('save-documents-order', order), // 保存文档排序
   getUserDataPath: () => ipcRenderer.invoke('get-user-data-path'),     // 获取用户数据目录路径
   saveDocument: (doc) => ipcRenderer.invoke('save-document', doc),    // 保存文档
   loadDocuments: () => ipcRenderer.invoke('load-documents'),        // 加载所有文档

@@ -85,7 +85,7 @@ export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpd
 
   return (
     <div className="relative w-full h-full glass-panel rounded-xl overflow-hidden flex flex-col items-center pt-6 pb-6">
-      <div className="w-full h-full overflow-y-auto custom-scrollbar-hidden p-12 md:p-20 flex flex-col items-center">
+      <div className="w-full h-full overflow-y-auto custom-scrollbar-hidden p-12 md:p-20 flex flex-col items-center select-text">
         <motion.div 
           className="mb-12 text-center w-full max-w-2xl flex-shrink-0"
           initial={{ opacity: 0, y: 10 }}

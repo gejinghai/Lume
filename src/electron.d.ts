@@ -1,4 +1,5 @@
 export interface ElectronAPI {
+  saveDocumentsOrder: (order: string[]) => Promise<boolean>;
   getUserDataPath: () => Promise<string>;
   saveDocument: (doc: { id: string; title: string; subtitle: string; content: string }) => Promise<string>;
   loadDocuments: () => Promise<Array<{ id: string; title: string; subtitle: string; content: string; updatedAt?: string }>>;
