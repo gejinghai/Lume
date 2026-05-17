@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useGaplessAudio } from '../lib/useGaplessAudio';
-import { resolveSound } from '../lib/assetResolver';
+import { resolveSound, resolveImage, resolveCustomImage } from '../lib/assetResolver';
 
 /**
  * StarsBackgroundProps 接口
@@ -25,6 +25,15 @@ export default function StarsBackground({
 }: StarsBackgroundProps) {
   // Canvas 引用
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [bgSrc, setBgSrc] = useState(resolveImage('stars'));
+
+  // 异步加载自定义背景图片
+  useEffect(() => {
+    resolveCustomImage('stars').then(dataUrl => {
+      if (dataUrl) setBgSrc(dataUrl);
+      else setBgSrc(resolveImage('stars'));
+    });
+  }, [customVersion]);
 
   // 使用 Web Audio API 实现无缝循环（支持自定义资源路径）
   useGaplessAudio(resolveSound('nightsound'), volume * 0.6, whiteNoiseEnabled);
@@ -193,11 +202,17 @@ export default function StarsBackground({
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [starDensity]);
+  }, [starDensity, customVersion]);
 
   return (
-    <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-black">
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full opacity-100 mix-blend-screen" />
+    <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-surface">
+      <img
+        src={bgSrc}
+        alt="Starry night background"
+        className="absolute inset-0 w-full h-full object-cover scale-105 opacity-60"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-surface/30 to-surface/90"></div>
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full mix-blend-screen opacity-80" />
     </div>
   );
 }

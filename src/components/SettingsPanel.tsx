@@ -50,8 +50,11 @@ const SCENE_RESOURCES: Record<string, ResourceItem[]> = {
   stars: [
     { type: 'sounds', name: 'nightsound', label: 'Night Sound' },
     { type: 'sounds', name: 'cricket',    label: 'Cricket' },
+    { type: 'images', name: 'stars',     label: 'Background Image' },
   ],
-  aurora: [],
+  aurora: [
+    { type: 'images', name: 'aurora', label: 'Background Image' },
+  ],
 };
 
 const ICONS: Record<string, React.ReactNode> = {

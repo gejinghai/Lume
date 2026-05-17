@@ -322,7 +322,7 @@ export default function App() {
           customVersion={customVersion}
         />
       )}
-      {scene === 'aurora' && <AuroraBackground auroraCount={auroraCount} />}
+      {scene === 'aurora' && <AuroraBackground auroraCount={auroraCount} customVersion={customVersion} />}
 
       {/* Global Ambient Music Player */}
       <AmbientMusicPlayer 

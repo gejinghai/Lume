@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { resolveImage, resolveCustomImage } from '../lib/assetResolver';
 
 /**
  * AuroraBackground 极光背景组件
@@ -72,13 +73,24 @@ void main() {
 
 interface AuroraBackgroundProps {
   auroraCount?: number;
+  customVersion?: number;
 }
 
-export default function AuroraBackground({ 
-  auroraCount = 5
+export default function AuroraBackground({
+  auroraCount = 5,
+  customVersion = 0,
 }: AuroraBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const countRef = useRef(auroraCount);
+  const [bgSrc, setBgSrc] = useState(resolveImage('aurora'));
+
+  // 异步加载自定义背景图片
+  useEffect(() => {
+    resolveCustomImage('aurora').then(dataUrl => {
+      if (dataUrl) setBgSrc(dataUrl);
+      else setBgSrc(resolveImage('aurora'));
+    });
+  }, [customVersion]);
 
   useEffect(() => {
     countRef.current = auroraCount;
@@ -175,11 +187,10 @@ export default function AuroraBackground({
 
   return (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-surface">
-      <img 
-        src="https://images.unsplash.com/photo-1531366936337-7785a649c71d?q=80&w=2574&auto=format&fit=crop" 
-        alt="Night sky background" 
+      <img
+        src={bgSrc}
+        alt="Aurora background"
         className="absolute inset-0 w-full h-full object-cover scale-105 opacity-40"
-        referrerPolicy="no-referrer"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-surface/60 to-surface/90"></div>
       <canvas 
