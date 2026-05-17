@@ -52,6 +52,8 @@ export default function App() {
 
   // ========== 场景与背景状态 ==========
   const [scene, setScene] = useState<SceneType>('rain');           // 当前场景类型
+  // 自定义资源版本号，变更时强制重挂载背景组件以加载新资源
+  const [customVersion, setCustomVersion] = useState(0);
   
   // 天气效果参数
   const [rainIntensity, setRainIntensity] = useState(0.6);         // 雨滴强度 (0-1)
@@ -199,6 +201,11 @@ export default function App() {
     }
   };
 
+  const handleCustomResourceChange = () => {
+    // 版本号 +1 强制重挂载背景组件，使新资源立即生效
+    setCustomVersion(v => v + 1);
+  };
+
   const handleAddTab = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -288,26 +295,32 @@ export default function App() {
   return (
     <div className="relative w-full h-screen overflow-hidden bg-surface text-on-surface font-sans select-none">
       {scene === 'rain' && (
-        <RainBackground 
-          intensity={rainIntensity} 
-          volume={volume} 
-          thunderEnabled={thunderEnabled} 
-          whiteNoiseEnabled={whiteNoiseEnabled}
-        />
+        <div key={customVersion}>
+          <RainBackground
+            intensity={rainIntensity}
+            volume={volume}
+            thunderEnabled={thunderEnabled}
+            whiteNoiseEnabled={whiteNoiseEnabled}
+          />
+        </div>
       )}
       {scene === 'snow' && (
-        <SnowBackground 
-          intensity={rainIntensity} 
-          volume={volume} 
-          whiteNoiseEnabled={whiteNoiseEnabled}
-        />
+        <div key={customVersion}>
+          <SnowBackground
+            intensity={rainIntensity}
+            volume={volume}
+            whiteNoiseEnabled={whiteNoiseEnabled}
+          />
+        </div>
       )}
       {scene === 'stars' && (
-        <StarsBackground 
-          starDensity={starDensity} 
-          whiteNoiseEnabled={whiteNoiseEnabled} 
-          volume={volume} 
-        />
+        <div key={customVersion}>
+          <StarsBackground
+            starDensity={starDensity}
+            whiteNoiseEnabled={whiteNoiseEnabled}
+            volume={volume}
+          />
+        </div>
       )}
       {scene === 'aurora' && <AuroraBackground auroraCount={auroraCount} />}
 
@@ -363,6 +376,7 @@ export default function App() {
         auroraCount={auroraCount}
         setAuroraCount={setAuroraCount}
         scene={scene}
+        onCustomResourceChange={handleCustomResourceChange}
       />
       
       {/* Main Workspace */}

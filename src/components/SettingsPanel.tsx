@@ -27,6 +27,7 @@ interface SettingsPanelProps {
   auroraCount: number;
   setAuroraCount: (val: number) => void;
   scene: string;
+  onCustomResourceChange?: () => void;
 }
 
 interface ResourceItem {
@@ -67,7 +68,7 @@ export default function SettingsPanel({
   whiteNoiseEnabled, setWhiteNoiseEnabled,
   ambientSoundsEnabled, setAmbientSoundsEnabled,
   auroraCount, setAuroraCount,
-  scene,
+  scene, onCustomResourceChange,
 }: SettingsPanelProps) {
   const isWeatherScene = scene === 'rain' || scene === 'snow';
   const isElectron = typeof window !== 'undefined' && window.electronAPI;
@@ -126,6 +127,8 @@ export default function SettingsPanel({
           images: config.images ?? {},
           music: config.music ?? {},
         });
+        // 通知父组件刷新背景组件
+        onCustomResourceChange?.();
       }
     } catch (e) {
       console.error('Failed to import resource:', e);
@@ -145,6 +148,7 @@ export default function SettingsPanel({
         images: config.images ?? {},
         music: config.music ?? {},
       });
+      onCustomResourceChange?.();
     } catch (e) {
       console.error('Failed to reset resource:', e);
     }
@@ -168,6 +172,7 @@ export default function SettingsPanel({
       images: config.images ?? {},
       music: config.music ?? {},
     });
+    onCustomResourceChange?.();
   };
 
   return (
