@@ -3,7 +3,7 @@
  * 负责窗口管理、菜单创建、快捷键注册、文件读写等核心功能
  */
 
-const { app, BrowserWindow, ipcMain, Menu, shell, dialog, globalShortcut } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, shell, dialog, globalShortcut, protocol, net } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -210,6 +210,13 @@ function createMenu() {
 }
 
 app.whenReady().then(() => {
+  // 注册 local-asset:// 协议用于访问 userData/custom/ 下的自定义资源
+  protocol.handle('local-asset', (request) => {
+    const url = new URL(request.url);
+    const filePath = path.join(app.getPath('userData'), 'custom', decodeURIComponent(url.pathname));
+    return net.fetch('file://' + filePath);
+  });
+
   createWindow();
 
   app.on('activate', () => {
@@ -389,6 +396,104 @@ ipcMain.handle('read-file', async (event, filePath) => {
 ipcMain.handle('write-file', async (event, { filePath, content }) => {
   try {
     fs.writeFileSync(filePath, content, 'utf-8');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// ========== 自定义资源管理 API ==========
+
+const customConfigPath = path.join(app.getPath('userData'), 'custom', 'config.json');
+
+function readCustomConfig() {
+  try {
+    if (fs.existsSync(customConfigPath)) {
+      return JSON.parse(fs.readFileSync(customConfigPath, 'utf-8'));
+    }
+  } catch (e) { /* ignore */ }
+  return { sounds: {}, images: {}, music: {} };
+}
+
+function writeCustomConfig(config) {
+  const dir = path.dirname(customConfigPath);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(customConfigPath, JSON.stringify(config, null, 2), 'utf-8');
+}
+
+ipcMain.handle('pick-audio-file', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Select Sound File',
+    filters: [
+      { name: 'Audio Files', extensions: ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac'] },
+    ],
+    properties: ['openFile'],
+  });
+  return result;
+});
+
+ipcMain.handle('pick-image-file', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Select Image File',
+    filters: [
+      { name: 'Image Files', extensions: ['jpg', 'jpeg', 'png', 'webp'] },
+    ],
+    properties: ['openFile'],
+  });
+  return result;
+});
+
+ipcMain.handle('import-resource', async (event, { type, name, sourcePath }) => {
+  try {
+    const userDataPath = app.getPath('userData');
+    const ext = path.extname(sourcePath);
+    // type: 'sounds' | 'images' | 'music'
+    const destDir = path.join(userDataPath, 'custom', type);
+    if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+
+    const destFile = path.join(destDir, `${name}${ext}`);
+    fs.copyFileSync(sourcePath, destFile);
+
+    // 更新 config
+    const config = readCustomConfig();
+    if (type === 'sounds') config.sounds[name] = `${name}${ext}`;
+    else if (type === 'images') config.images[name] = `${name}${ext}`;
+    else if (type === 'music') config.music[name] = `${name}${ext}`;
+    writeCustomConfig(config);
+
+    return { success: true, fileName: `${name}${ext}` };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('get-custom-config', () => {
+  return readCustomConfig();
+});
+
+ipcMain.handle('delete-custom-resource', async (event, { type, name }) => {
+  try {
+    const config = readCustomConfig();
+    const fileName = config[type]?.[name];
+    if (fileName) {
+      const filePath = path.join(app.getPath('userData'), 'custom', type, fileName);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      delete config[type][name];
+      writeCustomConfig(config);
+    }
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('get-custom-folder-path', () => {
+  return path.join(app.getPath('userData'), 'custom');
+});
+
+ipcMain.handle('open-folder', async (event, folderPath) => {
+  try {
+    await shell.openPath(folderPath);
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };

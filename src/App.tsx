@@ -14,6 +14,7 @@ import BottomBar from './components/BottomBar';
 import SettingsPanel from './components/SettingsPanel';
 import AmbientMusicPlayer from './components/AmbientMusicPlayer';
 import WelcomePage from './components/WelcomePage';
+import { loadCustomConfig } from './lib/assetResolver';
 
 /**
  * 场景类型 - 定义可用的背景效果
@@ -141,6 +142,7 @@ export default function App() {
 
   useEffect(() => {
     loadDocuments();
+    loadCustomConfig(); // 加载自定义资源配置
   }, [loadDocuments]);
 
   useEffect(() => {

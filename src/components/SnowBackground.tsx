@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useGaplessAudio } from '../lib/useGaplessAudio';
+import { resolveSound, resolveImage } from '../lib/assetResolver';
 
 /**
  * SnowBackground 雪花背景组件
@@ -77,8 +78,8 @@ export default function SnowBackground({
 }: SnowBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // 使用 Web Audio API 实现无缝循环（解决 <audio loop> 的 1-2s gap）
-  useGaplessAudio('./sounds/wind.mp3', volume, whiteNoiseEnabled);
+  // 使用 Web Audio API 实现无缝循环（支持自定义资源路径）
+  useGaplessAudio(resolveSound('wind'), volume, whiteNoiseEnabled);
 
   // Handle WebGL Shader
   useEffect(() => {
@@ -181,7 +182,7 @@ export default function SnowBackground({
   return (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-surface">
       <img 
-        src="./images/winter.jpg" 
+        src={resolveImage('winter')} 
         alt="Snowy mountain background" 
         className="absolute inset-0 w-full h-full object-cover scale-105 opacity-60"
         referrerPolicy="no-referrer"

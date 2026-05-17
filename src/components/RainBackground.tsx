@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useGaplessAudio } from '../lib/useGaplessAudio';
+import { resolveSound, resolveImage } from '../lib/assetResolver';
 
 /**
  * RainBackground 雨滴背景组件
@@ -235,9 +236,9 @@ export default function RainBackground({
 }: RainBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // 使用 Web Audio API 实现无缝循环（解决 <audio loop> 的 1-2s gap）
-  useGaplessAudio('./sounds/rain.mp3', volume, whiteNoiseEnabled);
-  useGaplessAudio('./sounds/thunder.mp3', volume, thunderEnabled && whiteNoiseEnabled);
+  // 使用 Web Audio API 实现无缝循环（支持自定义资源路径）
+  useGaplessAudio(resolveSound('rain'), volume, whiteNoiseEnabled);
+  useGaplessAudio(resolveSound('thunder'), volume, thunderEnabled && whiteNoiseEnabled);
 
   // Handle WebGL Shader
   useEffect(() => {
@@ -311,7 +312,7 @@ export default function RainBackground({
     const image = new Image();
     image.crossOrigin = 'anonymous';
     // Using a bright daytime city background for the shader
-    image.src = './images/rain.jpg';
+    image.src = resolveImage('rain');
     
     let textureLoaded = false;
     image.onload = () => {

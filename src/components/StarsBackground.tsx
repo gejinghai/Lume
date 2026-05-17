@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useGaplessAudio } from '../lib/useGaplessAudio';
+import { resolveSound } from '../lib/assetResolver';
 
 /**
  * StarsBackgroundProps 接口
@@ -23,9 +24,9 @@ export default function StarsBackground({
   // Canvas 引用
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // 使用 Web Audio API 实现无缝循环（解决 <audio loop> 的 1-2s gap）
-  useGaplessAudio('./sounds/nightsound.mp3', volume * 0.6, whiteNoiseEnabled);
-  useGaplessAudio('./sounds/cricket.mp3', volume * 0.4, whiteNoiseEnabled);
+  // 使用 Web Audio API 实现无缝循环（支持自定义资源路径）
+  useGaplessAudio(resolveSound('nightsound'), volume * 0.6, whiteNoiseEnabled);
+  useGaplessAudio(resolveSound('cricket'), volume * 0.4, whiteNoiseEnabled);
 
   useEffect(() => {
     const canvas = canvasRef.current;

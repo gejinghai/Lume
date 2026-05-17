@@ -41,6 +41,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onOpenPreferences: (callback) => ipcRenderer.on('open-preferences', callback),  // 打开偏好设置
   onChangeScene: (callback) => ipcRenderer.on('change-scene', (event, scene) => callback(scene)),  // 切换场景
   
+  // ========== 自定义资源管理 API ==========
+  pickAudioFile: () => ipcRenderer.invoke('pick-audio-file'),
+  pickImageFile: () => ipcRenderer.invoke('pick-image-file'),
+  importResource: (data) => ipcRenderer.invoke('import-resource', data),
+  getCustomConfig: () => ipcRenderer.invoke('get-custom-config'),
+  deleteCustomResource: (data) => ipcRenderer.invoke('delete-custom-resource', data),
+  getCustomFolderPath: () => ipcRenderer.invoke('get-custom-folder-path'),
+  openFolder: (folderPath) => ipcRenderer.invoke('open-folder', folderPath),
+
   // 移除所有监听器
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel)
 });
