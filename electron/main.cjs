@@ -3,7 +3,7 @@
  * 负责窗口管理、菜单创建、快捷键注册、文件读写等核心功能
  */
 
-const { app, BrowserWindow, ipcMain, Menu, shell, dialog, globalShortcut, protocol, net } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, shell, dialog, globalShortcut, protocol } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -109,10 +109,10 @@ function createWindow() {
 
   if (isDev) {
     mainWindow.loadURL('http://localhost:3000');
-    //mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
-    //mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
   }
 
   mainWindow.on('closed', () => {
@@ -210,13 +210,6 @@ function createMenu() {
 }
 
 app.whenReady().then(() => {
-  // 注册 local-asset:// 协议用于访问 userData/custom/ 下的自定义资源
-  protocol.handle('local-asset', (request) => {
-    const url = new URL(request.url);
-    const filePath = path.join(app.getPath('userData'), 'custom', decodeURIComponent(url.pathname));
-    return net.fetch('file://' + filePath);
-  });
-
   createWindow();
 
   app.on('activate', () => {
@@ -447,11 +440,11 @@ ipcMain.handle('import-resource', async (event, { type, name, sourcePath }) => {
   try {
     const userDataPath = app.getPath('userData');
     const ext = path.extname(sourcePath);
-    // type: 'sounds' | 'images' | 'music'
     const destDir = path.join(userDataPath, 'custom', type);
     if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
 
     const destFile = path.join(destDir, `${name}${ext}`);
+    console.log('[main] import-resource: copying', sourcePath, '→', destFile);
     fs.copyFileSync(sourcePath, destFile);
 
     // 更新 config
@@ -503,9 +496,13 @@ ipcMain.handle('read-custom-asset-dataurl', async (event, { type, name }) => {
   try {
     const config = readCustomConfig();
     const fileName = config[type]?.[name];
-    if (!fileName) return null;
+    if (!fileName) {
+      console.log('[main] read-custom-asset-dataurl: no file in config for', type, name, JSON.stringify(config));
+      return null;
+    }
 
     const filePath = path.join(app.getPath('userData'), 'custom', type, fileName);
+    console.log('[main] read-custom-asset-dataurl: looking for', filePath, 'exists:', fs.existsSync(filePath));
     if (!fs.existsSync(filePath)) return null;
 
     const ext = path.extname(fileName).slice(1).toLowerCase();
@@ -516,8 +513,11 @@ ipcMain.handle('read-custom-asset-dataurl', async (event, { type, name }) => {
     };
     const mime = mimeMap[ext] || 'application/octet-stream';
     const data = fs.readFileSync(filePath);
-    return `data:${mime};base64,${data.toString('base64')}`;
+    const result = `data:${mime};base64,${data.toString('base64')}`;
+    console.log('[main] read-custom-asset-dataurl: success, data URL length:', result.length);
+    return result;
   } catch (e) {
+    console.log('[main] read-custom-asset-dataurl: error', e);
     return null;
   }
 });

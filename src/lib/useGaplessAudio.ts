@@ -138,7 +138,8 @@ function applyLoopCrossFade(
   return result;
 }
 
-async function loadBuffer(src: string): Promise<CachedAudio | null> {
+/** 预加载音效文件并缓存处理后的 AudioBuffer，暴露给初始化阶段提前调用 */
+export async function loadBuffer(src: string): Promise<CachedAudio | null> {
   const cached = _bufferCache.get(src);
   if (cached) return cached;
 

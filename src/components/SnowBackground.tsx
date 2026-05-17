@@ -69,12 +69,14 @@ interface SnowBackgroundProps {
   intensity?: number;
   volume?: number;
   whiteNoiseEnabled?: boolean;
+  customVersion?: number;
 }
 
-export default function SnowBackground({ 
-  intensity = 0.5, 
+export default function SnowBackground({
+  intensity = 0.5,
   volume = 0.5,
-  whiteNoiseEnabled = true
+  whiteNoiseEnabled = true,
+  customVersion = 0,
 }: SnowBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 

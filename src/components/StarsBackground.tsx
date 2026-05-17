@@ -9,6 +9,7 @@ interface StarsBackgroundProps {
   volume?: number;           // 音量大小 (0-1)
   starDensity?: number;       // 星星密度
   whiteNoiseEnabled?: boolean;  // 白噪音开关
+  customVersion?: number;     // 自定义资源版本
 }
 
 /**
@@ -16,10 +17,11 @@ interface StarsBackgroundProps {
  * 使用 Canvas 2D 渲染静态星空
  * 支持流星效果和环境白噪音
  */
-export default function StarsBackground({ 
-  volume = 0.5, 
-  starDensity = 400, 
-  whiteNoiseEnabled = true 
+export default function StarsBackground({
+  volume = 0.5,
+  starDensity = 400,
+  whiteNoiseEnabled = true,
+  customVersion = 0,
 }: StarsBackgroundProps) {
   // Canvas 引用
   const canvasRef = useRef<HTMLCanvasElement>(null);

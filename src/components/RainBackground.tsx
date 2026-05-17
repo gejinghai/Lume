@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useGaplessAudio } from '../lib/useGaplessAudio';
-import { resolveSound, resolveImage } from '../lib/assetResolver';
+import { resolveSound, resolveImage, resolveCustomImage } from '../lib/assetResolver';
 
 /**
  * RainBackground 雨滴背景组件
@@ -226,13 +226,15 @@ interface RainBackgroundProps {
   volume?: number;
   thunderEnabled?: boolean;
   whiteNoiseEnabled?: boolean;
+  customVersion?: number;
 }
 
-export default function RainBackground({ 
-  intensity = 0.5, 
-  volume = 0.5, 
+export default function RainBackground({
+  intensity = 0.5,
+  volume = 0.5,
   thunderEnabled = false,
-  whiteNoiseEnabled = true
+  whiteNoiseEnabled = true,
+  customVersion = 0,
 }: RainBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -307,14 +309,20 @@ export default function RainBackground({
     const iMouseLocation = gl.getUniformLocation(program, 'iMouse');
     const iChannel0Location = gl.getUniformLocation(program, 'iChannel0');
 
-    // Load texture
+    // Load texture — 先尝试自定义图片（data URL），否则使用内建路径
     const texture = gl.createTexture();
     const image = new Image();
-    image.crossOrigin = 'anonymous';
-    // Using a bright daytime city background for the shader
-    image.src = resolveImage('rain');
-    
     let textureLoaded = false;
+    const loadTexture = async () => {
+      try {
+        let src = resolveImage('rain');
+        const customDataUrl = await resolveCustomImage('rain');
+        if (customDataUrl) src = customDataUrl;
+        image.src = src;
+      } catch (err) {
+        console.error('[RainBackground] Failed to load texture src:', err);
+      }
+    };
     image.onload = () => {
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
@@ -325,6 +333,10 @@ export default function RainBackground({
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       textureLoaded = true;
     };
+    image.onerror = () => {
+      console.error('[RainBackground] Failed to load texture:', image.src.substring(0, 100));
+    };
+    loadTexture();
 
     let mouseX = 0;
     let mouseY = intensity; // Use intensity prop to control rain amount
@@ -396,7 +408,7 @@ export default function RainBackground({
       gl.deleteTexture(texture);
       gl.deleteBuffer(positionBuffer);
     };
-  }, [intensity, thunderEnabled]); // Re-compile shader if thunderEnabled changes
+  }, [intensity, thunderEnabled, customVersion]); // Re-compile shader if thunderEnabled changes
 
   return (
     <>

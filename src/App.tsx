@@ -14,7 +14,7 @@ import BottomBar from './components/BottomBar';
 import SettingsPanel from './components/SettingsPanel';
 import AmbientMusicPlayer from './components/AmbientMusicPlayer';
 import WelcomePage from './components/WelcomePage';
-import { loadCustomConfig } from './lib/assetResolver';
+import { loadCustomConfig, preloadSceneAudio } from './lib/assetResolver';
 
 /**
  * 场景类型 - 定义可用的背景效果
@@ -102,23 +102,18 @@ export default function App() {
 
   const loadDocuments = useCallback(async () => {
     if (!isElectron) {
-      setIsLoading(false);
-      return;
+      return [];
     }
 
     try {
       const documents = await window.electronAPI.loadDocuments();
       if (documents && documents.length > 0) {
-        const loadedDocuments = documents.map(d => ({ ...d, isSaved: true }));
-        setDocuments(loadedDocuments);
-      } else {
-        setDocuments([]);
+        return documents.map(d => ({ ...d, isSaved: true }));
       }
     } catch (error) {
       console.error('Failed to load documents:', error);
-    } finally {
-      setIsLoading(false);
     }
+    return [];
   }, [isElectron]);
 
   const saveDocument = useCallback(async (tab: TabData) => {
@@ -143,11 +138,16 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    loadDocuments();
-    loadCustomConfig().then(() => {
-      // 自定义资源加载完成后强制重挂载背景组件，使自定义图片/音效生效
-      setCustomVersion(v => v + 1);
-    });
+    const init = async () => {
+      const [docs] = await Promise.all([
+        loadDocuments(),
+        loadCustomConfig(),
+        preloadSceneAudio('rain'), // 预解码雨景音效，避免阻塞主线程
+      ]);
+      setDocuments(docs);
+      setIsLoading(false);
+    };
+    init();
   }, [loadDocuments]);
 
   useEffect(() => {
@@ -298,32 +298,29 @@ export default function App() {
   return (
     <div className="relative w-full h-screen overflow-hidden bg-surface text-on-surface font-sans select-none">
       {scene === 'rain' && (
-        <div key={customVersion}>
-          <RainBackground
-            intensity={rainIntensity}
-            volume={volume}
-            thunderEnabled={thunderEnabled}
-            whiteNoiseEnabled={whiteNoiseEnabled}
-          />
-        </div>
+        <RainBackground
+          intensity={rainIntensity}
+          volume={volume}
+          thunderEnabled={thunderEnabled}
+          whiteNoiseEnabled={whiteNoiseEnabled}
+          customVersion={customVersion}
+        />
       )}
       {scene === 'snow' && (
-        <div key={customVersion}>
-          <SnowBackground
-            intensity={rainIntensity}
-            volume={volume}
-            whiteNoiseEnabled={whiteNoiseEnabled}
-          />
-        </div>
+        <SnowBackground
+          intensity={rainIntensity}
+          volume={volume}
+          whiteNoiseEnabled={whiteNoiseEnabled}
+          customVersion={customVersion}
+        />
       )}
       {scene === 'stars' && (
-        <div key={customVersion}>
-          <StarsBackground
-            starDensity={starDensity}
-            whiteNoiseEnabled={whiteNoiseEnabled}
-            volume={volume}
-          />
-        </div>
+        <StarsBackground
+          starDensity={starDensity}
+          whiteNoiseEnabled={whiteNoiseEnabled}
+          volume={volume}
+          customVersion={customVersion}
+        />
       )}
       {scene === 'aurora' && <AuroraBackground auroraCount={auroraCount} />}
 
