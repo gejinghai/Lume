@@ -104,12 +104,12 @@ function findAudioBoundaries(
 /**
  * 对 AudioBuffer 做循环交叉淡化，使首尾波形平滑衔接。
  *
- * 策略：将结尾 fadeFrames 个样本按递减权重混入开头 fadeFrames 个样本。
- * 这样循环从结尾回到开头时，波形是连续过渡的，不会产生 click / dip。
+ * 线性 cross-fade 对不相关信号（如噪音的不同时间段）会有 -3dB 功率下降，
+ * 此处使用等功率 cross-fade（sin² + cos² = 1），保持衔接处音量恒定。
  */
 function applyLoopCrossFade(
   buffer: AudioBuffer,
-  crossFadeMs = 60,
+  crossFadeMs = 80,
 ): AudioBuffer {
   const { numberOfChannels, sampleRate, length } = buffer;
   const fadeFrames = Math.min(
@@ -125,12 +125,12 @@ function applyLoopCrossFade(
     const dst = result.getChannelData(c);
     dst.set(src);
 
-    // 将结尾 fadeFrames 个样本按递减权重混入开头 fadeFrames 个样本
-    // 这样 position 0 从"结尾音频 * 1 + 开头音频 * 0"逐渐过渡到"结尾音频 * 0 + 开头音频 * 1"
+    // 等功率 cross-fade: 将结尾 fadeFrames 个样本混入开头
+    // sin²(t·π/2) + cos²(t·π/2) = 1 保证功率守恒
     for (let i = 0; i < fadeFrames; i++) {
       const t = i / fadeFrames; // 0 → 1
-      const tailWeight = 1 - t;
-      const headWeight = t;
+      const tailWeight = Math.cos(t * Math.PI / 2);
+      const headWeight = Math.sin(t * Math.PI / 2);
       dst[i] = src[length - fadeFrames + i] * tailWeight + src[i] * headWeight;
     }
   }
