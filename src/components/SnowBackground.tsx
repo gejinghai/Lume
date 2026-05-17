@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useGaplessAudio } from '../lib/useGaplessAudio';
-import { resolveSound, resolveImage } from '../lib/assetResolver';
+import { resolveSound, resolveImage, resolveCustomImage } from '../lib/assetResolver';
 
 /**
  * SnowBackground 雪花背景组件
@@ -79,6 +79,15 @@ export default function SnowBackground({
   customVersion = 0,
 }: SnowBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [bgSrc, setBgSrc] = useState(resolveImage('winter'));
+
+  // 异步加载自定义背景图片
+  useEffect(() => {
+    resolveCustomImage('winter').then(dataUrl => {
+      if (dataUrl) setBgSrc(dataUrl);
+      else setBgSrc(resolveImage('winter'));
+    });
+  }, [customVersion]);
 
   // 使用 Web Audio API 实现无缝循环（支持自定义资源路径）
   useGaplessAudio(resolveSound('wind'), volume, whiteNoiseEnabled);
@@ -179,15 +188,14 @@ export default function SnowBackground({
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [intensity]);
+  }, [intensity, customVersion]);
 
   return (
     <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-surface">
-      <img 
-        src={resolveImage('winter')} 
-        alt="Snowy mountain background" 
+      <img
+        src={bgSrc}
+        alt="Snowy mountain background"
         className="absolute inset-0 w-full h-full object-cover scale-105 opacity-60"
-        referrerPolicy="no-referrer"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-surface/30 to-surface/90"></div>
       <canvas 
