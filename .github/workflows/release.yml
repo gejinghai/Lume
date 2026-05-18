@@ -1,9 +1,11 @@
 name: Build and Release
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 1.0.1)'
+        required: true
 
 jobs:
   build:
@@ -15,6 +17,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -34,15 +38,11 @@ jobs:
         env:
           GH_TOKEN: ""
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: Lume-release
-          path: release/
-
-      - name: Create Release
+      - name: Create Release and upload artifacts
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ github.event.inputs.version }}
+          name: v${{ github.event.inputs.version }}
           files: |
             release/*.dmg
             release/*.exe
