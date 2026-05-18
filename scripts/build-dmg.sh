@@ -31,17 +31,15 @@ npm run build
 echo "[2/5] 打包 Electron 应用..."
 ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npx electron-builder --publish=never
 
-# 3. 对 app 进行 ad-hoc 签名并清除隔离属性
-echo "[3/5] 修复 macOS 安全属性..."
+# 3. 用 electron-builder 已签名的 app 重新打包 ZIP
+# 注意：electron-builder 会自动检测本地证书签名（见上一步日志中的 signing identity）
+# 我们只需用同款 app 重新打包 ZIP + 更新校验值即可
+echo "[3/5] 重新打包 ZIP（保留 electron-builder 的签名）..."
 APP_PATH="$RELEASE_DIR/mac-arm64/Lume.app"
 if [ -d "$APP_PATH" ]; then
-  xattr -cr "$APP_PATH" 2>/dev/null || true
-  # 签名所有必须的二进制（包括 ShipIt）
-  codesign --force --deep -s - "$APP_PATH" 2>/dev/null || true
-  echo "  ✓ 已完成 ad-hoc 签名"
+  echo "  ✓ 验证签名: $(codesign -dv "$APP_PATH" 2>&1 | grep 'Authority=' || echo 'ad-hoc')"
 
-  # 用已签名的 app 重新打包 ZIP（覆盖 electron-builder 生成的未签名 ZIP）
-  echo "  ✓ 重新打包 ZIP（已签名）..."
+  # 用已签名的 app 重新打包 ZIP（覆盖 electron-builder 生成的）
   rm -f "$RELEASE_DIR/$AUTO_ZIP_NAME"
   cd "$RELEASE_DIR/mac-arm64"
   zip -r -y "$RELEASE_DIR/$AUTO_ZIP_NAME" "Lume.app" -x "*.DS_Store"
@@ -51,11 +49,9 @@ if [ -d "$APP_PATH" ]; then
   echo "  ✓ 更新 latest-mac.yml..."
   ZIP_SIZE=$(stat -f%z "$RELEASE_DIR/$AUTO_ZIP_NAME")
   ZIP_SHA512=$(shasum -a 512 "$RELEASE_DIR/$AUTO_ZIP_NAME" | xxd -r -p | base64)
-  # 用 node 解析并改写 yml
   node -e "
 const fs = require('fs');
 const yml = fs.readFileSync('$RELEASE_DIR/latest-mac.yml', 'utf8');
-// 更新 sha512 和 size
 const updated = yml
   .replace(/sha512: .+/g, 'sha512: $ZIP_SHA512')
   .replace(/size: \d+/g, 'size: $ZIP_SIZE');

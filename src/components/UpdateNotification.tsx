@@ -97,7 +97,7 @@ export default function UpdateNotification() {
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50"
         >
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-highest/80 backdrop-blur-2xl border border-outline-variant/20 shadow-2xl text-sm">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-highest/80 backdrop-blur-2xl border border-outline-variant/20 shadow-2xl text-sm max-w-[90vw]">
             {status.type === 'checking' && (
               <>
                 <div className="w-4 h-4 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
@@ -151,7 +151,7 @@ export default function UpdateNotification() {
                 <div className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-on-surface text-xs font-medium">Update check failed</span>
-                  <span className="text-outline-variant text-[11px] truncate max-w-[280px]">{status.message}</span>
+                  <span className="text-outline-variant text-[11px] break-all max-w-[320px] leading-tight">{status.message}</span>
                 </div>
                 <button
                   onClick={handleCheckAgain}
@@ -171,7 +171,7 @@ export default function UpdateNotification() {
                   <span className="text-on-surface text-xs">
                     Download failed for <strong>v{status.version}</strong>
                   </span>
-                  <span className="text-outline-variant text-[11px] truncate max-w-[280px]">{status.message}</span>
+                  <span className="text-outline-variant text-[11px] break-all max-w-[320px] leading-tight">{status.message}</span>
                 </div>
                 <button
                   onClick={handleDownload}
