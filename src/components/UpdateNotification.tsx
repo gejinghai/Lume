@@ -148,17 +148,18 @@ export default function UpdateNotification() {
 
             {status.type === 'check-error' && (
               <>
-                <div className="w-2 h-2 rounded-full bg-red-400" />
-                <span className="text-on-surface text-xs">
-                  Update check failed
-                </span>
+                <div className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <span className="text-on-surface text-xs font-medium">Update check failed</span>
+                  <span className="text-outline-variant text-[11px] truncate max-w-[280px]">{status.message}</span>
+                </div>
                 <button
                   onClick={handleCheckAgain}
-                  className="px-3 py-1 rounded-lg border border-outline-variant/40 text-on-surface text-xs font-medium hover:bg-surface-higher transition-colors"
+                  className="px-3 py-1 rounded-lg border border-outline-variant/40 text-on-surface text-xs font-medium hover:bg-surface-higher transition-colors shrink-0"
                 >
                   Retry
                 </button>
-                <button onClick={clear} className="text-outline-variant hover:text-on-surface text-xs transition-colors">
+                <button onClick={clear} className="text-outline-variant hover:text-on-surface text-xs transition-colors shrink-0">
                   Dismiss
                 </button>
               </>
@@ -166,9 +167,12 @@ export default function UpdateNotification() {
 
             {status.type === 'download-error' && (
               <>
-                <span className="text-on-surface text-xs">
-                  Download failed for <strong>v{status.version}</strong>
-                </span>
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <span className="text-on-surface text-xs">
+                    Download failed for <strong>v{status.version}</strong>
+                  </span>
+                  <span className="text-outline-variant text-[11px] truncate max-w-[280px]">{status.message}</span>
+                </div>
                 <button
                   onClick={handleDownload}
                   className="px-3 py-1 rounded-lg bg-secondary text-on-secondary text-xs font-medium hover:opacity-80 transition-opacity"
