@@ -1,6 +1,6 @@
 {
   "name": "lume",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A minimalist immersive writing application for macOS",
   "author": "Lume Team",
   "main": "electron/main.cjs",
@@ -48,11 +48,6 @@
     "appId": "com.lume.app",
     "productName": "Lume",
     "icon": "public/images/logo.ico",
-    "publish": {
-      "provider": "github",
-      "owner": "gejinghai",
-      "repo": "Lume"
-    },
     "directories": {
       "output": "release"
     },

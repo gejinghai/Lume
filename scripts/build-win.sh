@@ -5,14 +5,17 @@
 
 set -e
 
-PROJECT_DIR="/Users/gejinghai/Lume/Lume"
+# 从脚本所在目录推导项目根目录
+SCRIPTS_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPTS_DIR/.." && pwd)"
 RELEASE_DIR="$PROJECT_DIR/release"
 # 从 package.json 读取版本号
 VERSION=$(node -p "require('$PROJECT_DIR/package.json').version")
-WIN_NAME="Lume-${VERSION}-win"
 ZIP_NAME="Lume-${VERSION}-win.zip"
 
 echo "========== 开始打包 Windows 版本 =========="
+echo "项目目录: $PROJECT_DIR"
+echo "版本: $VERSION"
 
 # 1. 构建 Vite
 echo "[1/4] 构建 Vite..."

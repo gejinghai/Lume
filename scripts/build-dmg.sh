@@ -5,13 +5,19 @@
 
 set -e
 
-PROJECT_DIR="/Users/gejinghai/Lume/Lume"
-SCRIPTS_DIR="$PROJECT_DIR/scripts"
+# 从脚本所在目录推导项目根目录
+SCRIPTS_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPTS_DIR/.." && pwd)"
 RELEASE_DIR="$PROJECT_DIR/release"
 TEMP_DIR="/tmp/Lume_DMG"
-DMG_NAME="Lume-1.0.0-arm64.dmg"
 
-echo "========== 开始打包 =========="
+# 读取版本号
+VERSION=$(node -p "require('$PROJECT_DIR/package.json').version")
+DMG_NAME="Lume-${VERSION}-arm64.dmg"
+
+echo "========== 开始打包 DMG =========="
+echo "项目目录: $PROJECT_DIR"
+echo "版本: $VERSION"
 
 # 1. 构建 Vite
 echo "[1/6] 构建 Vite..."
