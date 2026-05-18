@@ -31,8 +31,12 @@ ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npx electron-builder --p
 # 3. 创建 InitLume.app
 echo "[3/6] 创建首次启动助手..."
 cd "$SCRIPTS_DIR"
-rm -rf InitLume.app
-./create-init-app.sh
+if [ -f "./create-init-app.sh" ]; then
+  rm -rf InitLume.app
+  bash ./create-init-app.sh
+else
+  echo "[3/6] 跳过，create-init-app.sh 不存在"
+fi
 
 # 4. 准备 DMG 内容
 echo "[4/6] 准备 DMG 内容..."
@@ -42,11 +46,15 @@ mkdir -p "$TEMP_DIR"
 # 复制 Lume.app
 cp -R "$RELEASE_DIR/mac-arm64/Lume.app" "$TEMP_DIR/"
 
-# 复制 InitLume.app
-cp -R "$SCRIPTS_DIR/InitLume.app" "$TEMP_DIR/"
+# 复制 InitLume.app（如果存在）
+if [ -d "$SCRIPTS_DIR/InitLume.app" ]; then
+  cp -R "$SCRIPTS_DIR/InitLume.app" "$TEMP_DIR/"
+fi
 
-# 复制安装说明
-cp "$RELEASE_DIR/安装说明.txt" "$TEMP_DIR/"
+# 复制安装说明（如果存在）
+if [ -f "$RELEASE_DIR/安装说明.txt" ]; then
+  cp "$RELEASE_DIR/安装说明.txt" "$TEMP_DIR/"
+fi
 
 # 创建 Applications 快捷方式
 ln -s /Applications "$TEMP_DIR/Applications"
