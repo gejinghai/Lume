@@ -29,6 +29,18 @@ npm run build
 echo "[2/4] 打包 Electron 应用..."
 ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npx electron-builder --publish=never
 
+# 2.5 对 app 进行 ad-hoc 签名并清除隔离属性
+# 避免未签名 app 被 macOS Gatekeeper 标记为"已损坏"
+echo "[2.5/4] 修复 macOS 安全属性..."
+APP_PATH="$RELEASE_DIR/mac-arm64/Lume.app"
+if [ -d "$APP_PATH" ]; then
+  # 清除所有扩展属性（包括 quarantine）
+  xattr -cr "$APP_PATH" 2>/dev/null || true
+  # ad-hoc 签名（使用 - 表示自签名，任何 Mac 都能识别）
+  codesign --force --deep -s - "$APP_PATH" 2>/dev/null || true
+  echo "  ✓ 已完成 ad-hoc 签名"
+fi
+
 # 3. 准备 DMG 内容
 echo "[3/4] 准备 DMG 内容..."
 rm -rf "$TEMP_DIR"
