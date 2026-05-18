@@ -13,6 +13,7 @@ import Editor from './components/Editor';
 import BottomBar from './components/BottomBar';
 import SettingsPanel from './components/SettingsPanel';
 import AmbientMusicPlayer from './components/AmbientMusicPlayer';
+import UpdateNotification from './components/UpdateNotification';
 import WelcomePage from './components/WelcomePage';
 import { loadCustomConfig, preloadSceneAudio } from './lib/assetResolver';
 
@@ -327,12 +328,15 @@ export default function App() {
       {scene === 'aurora' && <AuroraBackground auroraCount={auroraCount} customVersion={customVersion} />}
 
       {/* Global Ambient Music Player */}
-      <AmbientMusicPlayer 
-        volume={volume} 
-        enabled={ambientSoundsEnabled} 
+      <AmbientMusicPlayer
+        volume={volume}
+        enabled={ambientSoundsEnabled}
       />
 
-      <TopBar 
+      {/* Auto Update Notification */}
+      <UpdateNotification />
+
+      <TopBar
         isUIVisible={isUIVisible || isSidebarOpen || isSettingsOpen} 
         toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         toggleFont={() => setFontFamily(prev => prev === 'sans' ? 'serif' : 'sans')}

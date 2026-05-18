@@ -23,6 +23,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
     "electron-store": "^8.2.0",
+    "electron-updater": "^6.8.3",
     "express": "^4.21.2",
     "framer-motion": "^12.38.0",
     "lucide-react": "^0.546.0",
@@ -47,6 +48,11 @@
     "appId": "com.lume.app",
     "productName": "Lume",
     "icon": "public/images/logo.ico",
+    "publish": {
+      "provider": "github",
+      "owner": "gejinghai",
+      "repo": "Lume"
+    },
     "directories": {
       "output": "release"
     },
@@ -69,7 +75,10 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "icon": "public/images/logo.ico",

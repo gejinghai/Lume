@@ -38,6 +38,17 @@ export interface ElectronAPI {
   onChangeScene: (callback: (scene: string) => void) => void;
   
   removeAllListeners: (channel: string) => void;
+
+  // 自动更新
+  checkForUpdates: () => Promise<{ success: boolean; error?: string }>;
+  downloadUpdate: () => Promise<{ success: boolean }>;
+  installUpdate: () => Promise<{ success: boolean }>;
+  onUpdateChecking: (callback: () => void) => void;
+  onUpdateAvailable: (callback: (info: { version: string; releaseDate?: string }) => void) => void;
+  onUpdateNotAvailable: (callback: () => void) => void;
+  onUpdateError: (callback: (msg: string) => void) => void;
+  onUpdateDownloadProgress: (callback: (progress: { percent: number; bytesPerSecond: number }) => void) => void;
+  onUpdateDownloaded: (callback: (info: { version: string }) => void) => void;
 }
 
 declare global {
