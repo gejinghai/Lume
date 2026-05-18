@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useGaplessAudio } from '../lib/useGaplessAudio';
-import { resolveSound, resolveImage, resolveCustomImage } from '../lib/assetResolver';
+import { resolveSound, resolveImage, resolveCustomImage, resolveCustomSound } from '../lib/assetResolver';
 
 /**
  * RainBackground 雨滴背景组件
@@ -237,10 +237,20 @@ export default function RainBackground({
   customVersion = 0,
 }: RainBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [rainSrc, setRainSrc] = useState(resolveSound('rain'));
+  const [thunderSrc, setThunderSrc] = useState(resolveSound('thunder'));
+
+  // 异步加载自定义音效
+  useEffect(() => {
+    Promise.all([
+      resolveCustomSound('rain').then(v => { if (v) setRainSrc(v); else setRainSrc(resolveSound('rain')); }),
+      resolveCustomSound('thunder').then(v => { if (v) setThunderSrc(v); else setThunderSrc(resolveSound('thunder')); }),
+    ]);
+  }, [customVersion]);
 
   // 使用 Web Audio API 实现无缝循环（支持自定义资源路径）
-  useGaplessAudio(resolveSound('rain'), volume, whiteNoiseEnabled);
-  useGaplessAudio(resolveSound('thunder'), volume, thunderEnabled && whiteNoiseEnabled);
+  useGaplessAudio(rainSrc, volume, whiteNoiseEnabled);
+  useGaplessAudio(thunderSrc, volume, thunderEnabled && whiteNoiseEnabled);
 
   // Handle WebGL Shader
   useEffect(() => {

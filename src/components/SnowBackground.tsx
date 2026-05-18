@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useGaplessAudio } from '../lib/useGaplessAudio';
-import { resolveSound, resolveImage, resolveCustomImage } from '../lib/assetResolver';
+import { resolveSound, resolveImage, resolveCustomImage, resolveCustomSound } from '../lib/assetResolver';
 
 /**
  * SnowBackground 雪花背景组件
@@ -80,6 +80,7 @@ export default function SnowBackground({
 }: SnowBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [bgSrc, setBgSrc] = useState(resolveImage('winter'));
+  const [windSrc, setWindSrc] = useState(resolveSound('wind'));
 
   // 异步加载自定义背景图片
   useEffect(() => {
@@ -89,8 +90,13 @@ export default function SnowBackground({
     });
   }, [customVersion]);
 
+  // 异步加载自定义音效
+  useEffect(() => {
+    resolveCustomSound('wind').then(v => { if (v) setWindSrc(v); else setWindSrc(resolveSound('wind')); });
+  }, [customVersion]);
+
   // 使用 Web Audio API 实现无缝循环（支持自定义资源路径）
-  useGaplessAudio(resolveSound('wind'), volume, whiteNoiseEnabled);
+  useGaplessAudio(windSrc, volume, whiteNoiseEnabled);
 
   // Handle WebGL Shader
   useEffect(() => {

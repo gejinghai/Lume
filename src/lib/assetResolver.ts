@@ -90,6 +90,22 @@ export async function resolveCustomImage(name: string): Promise<string | null> {
 }
 
 /**
+ * 异步加载自定义音效。
+ * 有自定义文件时通过 IPC 读取为 data URL，否则返回 null。
+ */
+export async function resolveCustomSound(name: string): Promise<string | null> {
+  if (!_customConfig?.sounds?.[name]) return null;
+  if (typeof window !== 'undefined' && window.electronAPI) {
+    try {
+      return await window.electronAPI.readCustomAssetDataUrl({ type: 'sounds', name });
+    } catch (err) {
+      console.error('[assetResolver] Failed to read custom sound:', err);
+    }
+  }
+  return null;
+}
+
+/**
  * 在初始化阶段预解码指定场景的音效文件。
  * 避免组件挂载后同步的 RMS 扫描阻塞主线程，导致 WebGL 背景初始化延迟。
  */
