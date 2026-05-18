@@ -49,6 +49,10 @@ mkdir -p "$TEMP_DIR"
 # 复制 Lume.app
 cp -R "$RELEASE_DIR/mac-arm64/Lume.app" "$TEMP_DIR/"
 
+# 复制首次启动修复工具（对非技术用户提供可视化修复方式）
+cp "$SCRIPTS_DIR/修复-首次启动.command" "$TEMP_DIR/"
+chmod +x "$TEMP_DIR/修复-首次启动.command"
+
 # 创建 Applications 快捷方式
 ln -s /Applications "$TEMP_DIR/Applications"
 
