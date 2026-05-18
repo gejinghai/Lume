@@ -1,6 +1,6 @@
 {
   "name": "lume",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A minimalist immersive writing application for macOS",
   "author": "Lume Team",
   "main": "electron/main.cjs",
@@ -14,7 +14,8 @@
     "electron:dev": "vite build && electron .",
     "electron:build": "vite build && electron-builder",
     "electron:build:cn": "vite build && ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder",
-    "electron:start": "electron ."
+    "electron:start": "electron .",
+    "electron:test-update": "LUME_DEV_UPDATE=true electron ."
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
@@ -61,7 +62,7 @@
       }
     ],
     "mac": {
-      "target": "dmg",
+      "target": ["dmg", "zip"],
       "category": "public.app-category.productivity",
       "icon": "public/images/logo.png"
     },

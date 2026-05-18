@@ -201,7 +201,11 @@ function createMenu() {
       label: 'Help',
       submenu: [
         { label: 'Learn More', click: () => shell.openExternal('https://github.com') },
-        { label: 'Documentation', click: () => shell.openExternal('https://github.com') }
+        { label: 'Documentation', click: () => shell.openExternal('https://github.com') },
+        { type: 'separator' },
+        { label: 'Check for Updates...', click: () => {
+          autoUpdater.checkForUpdates().catch(() => {});
+        }}
       ]
     }
   ];
@@ -213,7 +217,7 @@ function createMenu() {
 app.whenReady().then(() => {
   createWindow();
 
-  // 自动更新 —— 配置 GitHub Releases 源（public 仓库无需 token）
+  // ========== 自动更新 ==========
   autoUpdater.setFeedURL({
     provider: 'github',
     owner: 'gejinghai',
@@ -221,6 +225,18 @@ app.whenReady().then(() => {
   });
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = false;
+  // 开发模式下测试自动更新（npm run electron:test-update 时启用）
+  if (process.env.LUME_DEV_UPDATE) {
+    autoUpdater.forceDevUpdateConfig = true;
+  }
+
+  // 清除缓存的更新状态，确保每次启动都能重新检查
+  const updateCachePath = path.join(app.getPath('userData'), '.update_cache');
+  const stagingDir = path.join(app.getPath('userData'), '__update__');
+  try { fs.rmSync(updateCachePath, { recursive: true, force: true }); } catch {}
+  try { fs.rmSync(stagingDir, { recursive: true, force: true }); } catch {}
+
+  // 延迟 5 秒后自动检查更新
   setTimeout(() => autoUpdater.checkForUpdates().catch(() => {}), 5000);
 
   autoUpdater.on('checking-for-update', () => {
@@ -233,6 +249,8 @@ app.whenReady().then(() => {
     mainWindow?.webContents.send('update-not-available');
   });
   autoUpdater.on('error', (err) => {
+    // 检查错误不直接显示给用户（网络波动等），但下载错误会由 IPC 处理
+    console.warn('[autoUpdater] error:', err.message);
     mainWindow?.webContents.send('update-error', err.message);
   });
   autoUpdater.on('download-progress', (progress) => {
@@ -558,6 +576,11 @@ ipcMain.handle('read-custom-asset-dataurl', async (event, { type, name }) => {
 // ========== 自动更新 IPC ==========
 ipcMain.handle('check-for-updates', async () => {
   try {
+    // 清除缓存，确保每次手动检查都是全新查询
+    const updateCachePath = path.join(app.getPath('userData'), '.update_cache');
+    const stagingDir = path.join(app.getPath('userData'), '__update__');
+    try { fs.rmSync(updateCachePath, { recursive: true, force: true }); } catch {}
+    try { fs.rmSync(stagingDir, { recursive: true, force: true }); } catch {}
     await autoUpdater.checkForUpdates();
     return { success: true };
   } catch (err) {
@@ -566,8 +589,12 @@ ipcMain.handle('check-for-updates', async () => {
 });
 
 ipcMain.handle('download-update', async () => {
-  autoUpdater.downloadUpdate();
-  return { success: true };
+  try {
+    autoUpdater.downloadUpdate();
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: String(err) };
+  }
 });
 
 ipcMain.handle('install-update', () => {
