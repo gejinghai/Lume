@@ -1,6 +1,6 @@
 {
   "name": "lume",
-  "version": "1.0.3",
+  "version": "1.0.2",
   "description": "A minimalist immersive writing application for macOS",
   "author": "Lume Team",
   "main": "electron/main.cjs",
@@ -24,6 +24,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
     "electron-store": "^8.2.0",
+    "electron-updater": "^6.8.3",
     "express": "^4.21.2",
     "framer-motion": "^12.38.0",
     "lucide-react": "^0.546.0",
@@ -55,14 +56,12 @@
       "dist/**/*",
       "electron/**/*"
     ],
-    "extraResources": [
-      {
-        "from": "scripts/InitLume.app",
-        "to": "InitLume.app"
-      }
-    ],
+    "extraResources": [],
     "mac": {
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "category": "public.app-category.productivity",
       "icon": "public/images/logo.png"
     },
@@ -70,7 +69,10 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "icon": "public/images/logo.ico",

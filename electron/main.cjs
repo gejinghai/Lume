@@ -110,10 +110,10 @@ function createWindow() {
 
   if (isDev) {
     mainWindow.loadURL('http://localhost:3000');
-     mainWindow.webContents.openDevTools();
+     // mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
-     mainWindow.webContents.openDevTools();
+     // mainWindow.webContents.openDevTools();
   }
 
   mainWindow.on('closed', () => {
@@ -225,7 +225,6 @@ app.whenReady().then(() => {
   });
   autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = false;
-  // 开发模式下测试自动更新（npm run electron:test-update 时启用）
   if (process.env.LUME_DEV_UPDATE) {
     autoUpdater.forceDevUpdateConfig = true;
   }
@@ -249,7 +248,6 @@ app.whenReady().then(() => {
     mainWindow?.webContents.send('update-not-available');
   });
   autoUpdater.on('error', (err) => {
-    // 检查错误不直接显示给用户（网络波动等），但下载错误会由 IPC 处理
     console.warn('[autoUpdater] error:', err.message);
     mainWindow?.webContents.send('update-error', err.message);
   });
@@ -576,7 +574,6 @@ ipcMain.handle('read-custom-asset-dataurl', async (event, { type, name }) => {
 // ========== 自动更新 IPC ==========
 ipcMain.handle('check-for-updates', async () => {
   try {
-    // 清除缓存，确保每次手动检查都是全新查询
     const updateCachePath = path.join(app.getPath('userData'), '.update_cache');
     const stagingDir = path.join(app.getPath('userData'), '__update__');
     try { fs.rmSync(updateCachePath, { recursive: true, force: true }); } catch {}
