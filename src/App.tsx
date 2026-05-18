@@ -64,7 +64,7 @@ export default function App() {
   
   // 环境音设置
   const [whiteNoiseEnabled, setWhiteNoiseEnabled] = useState(true);       // 白噪音开关
-  const [ambientSoundsEnabled, setAmbientSoundsEnabled] = useState(true);  // 环境音开关
+  const [ambientSoundsEnabled, setAmbientSoundsEnabled] = useState(false);  // 环境音开关（默认关闭）
   const [volume, setVolume] = useState(0.5);                      // 音量大小 (0-1)
   
   // 极光效果参数
