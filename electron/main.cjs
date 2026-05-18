@@ -213,10 +213,15 @@ function createMenu() {
 app.whenReady().then(() => {
   createWindow();
 
-  // 自动更新 —— 启动后静默检查
+  // 自动更新 —— 配置 GitHub Releases 源
+  autoUpdater.setFeedURL({
+    provider: 'github',
+    owner: 'gejinghai',
+    repo: 'Lume',
+  });
   autoUpdater.autoDownload = false; // 只通知用户，让用户选择下载
   autoUpdater.autoInstallOnAppQuit = false; // 不自动退出安装，由用户手动触发
-  // 不直接检查，延迟几秒避免与启动争抢资源
+  // 启动后静默检查（延迟几秒避免与启动争抢资源）
   setTimeout(() => autoUpdater.checkForUpdates().catch(() => {}), 5000);
 
   // ──── 更新事件 ────

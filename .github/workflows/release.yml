@@ -26,9 +26,13 @@ jobs:
 
       - name: Build DMG (macOS)
         run: bash scripts/build-dmg.sh
+        env:
+          GH_TOKEN: ""
 
       - name: Build Windows installer (cross-compile)
         run: bash scripts/build-win.sh
+        env:
+          GH_TOKEN: ""
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
