@@ -54,14 +54,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // 移除所有监听器
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
 
-  // ========== 自动更新 API ==========
-  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
-  downloadUpdate: () => ipcRenderer.invoke('download-update'),
-  installUpdate: () => ipcRenderer.invoke('install-update'),
-  onUpdateChecking: (callback) => ipcRenderer.on('update-checking', callback),
-  onUpdateAvailable: (callback) => ipcRenderer.on('update-available', (event, info) => callback(info)),
-  onUpdateNotAvailable: (callback) => ipcRenderer.on('update-not-available', callback),
-  onUpdateError: (callback) => ipcRenderer.on('update-error', (event, msg) => callback(msg)),
-  onUpdateDownloadProgress: (callback) => ipcRenderer.on('update-download-progress', (event, progress) => callback(progress)),
-  onUpdateDownloaded: (callback) => ipcRenderer.on('update-downloaded', (event, info) => callback(info)),
+  // ========== 自动更新 API（已注释）==========
+  // checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  // downloadUpdate: () => ipcRenderer.invoke('download-update'),
+  // installUpdate: () => ipcRenderer.invoke('install-update'),
+  // onUpdateChecking: (callback) => ipcRenderer.on('update-checking', callback),
+  // onUpdateAvailable: (callback) => ipcRenderer.on('update-available', (event, info) => callback(info)),
+  // onUpdateNotAvailable: (callback) => ipcRenderer.on('update-not-available', callback),
+  // onUpdateError: (callback) => ipcRenderer.on('update-error', (event, msg) => callback(msg)),
+  // onUpdateDownloadProgress: (callback) => ipcRenderer.on('update-download-progress', (event, progress) => callback(progress)),
+  // onUpdateDownloaded: (callback) => ipcRenderer.on('update-downloaded', (event, info) => callback(info)),
 });

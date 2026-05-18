@@ -4,7 +4,7 @@
  */
 
 const { app, BrowserWindow, ipcMain, Menu, shell, dialog, globalShortcut, protocol } = require('electron');
-const { autoUpdater } = require('electron-updater');
+// const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
 
@@ -202,10 +202,10 @@ function createMenu() {
       submenu: [
         { label: 'Learn More', click: () => shell.openExternal('https://github.com') },
         { label: 'Documentation', click: () => shell.openExternal('https://github.com') },
-        { type: 'separator' },
-        { label: 'Check for Updates...', click: () => {
-          autoUpdater.checkForUpdates().catch(() => {});
-        }}
+        // { type: 'separator' },
+        // { label: 'Check for Updates...', click: () => {
+        //   autoUpdater.checkForUpdates().catch(() => {});
+        // }}
       ]
     }
   ];
@@ -217,49 +217,47 @@ function createMenu() {
 app.whenReady().then(() => {
   createWindow();
 
-  // ========== 自动更新 ==========
-  autoUpdater.setFeedURL({
-    provider: 'github',
-    owner: 'gejinghai',
-    repo: 'Lume',
-  });
-  autoUpdater.autoDownload = false;
-  autoUpdater.autoInstallOnAppQuit = false;
-  if (process.env.LUME_DEV_UPDATE) {
-    autoUpdater.forceDevUpdateConfig = true;
-  }
+  // ========== 自动更新（已注释）==========
+  // autoUpdater.setFeedURL({
+  //   provider: 'github',
+  //   owner: 'gejinghai',
+  //   repo: 'Lume',
+  // });
+  // autoUpdater.autoDownload = false;
+  // autoUpdater.autoInstallOnAppQuit = false;
+  // if (process.env.LUME_DEV_UPDATE) {
+  //   autoUpdater.forceDevUpdateConfig = true;
+  // }
 
-  // 清除缓存的更新状态，确保每次启动都能重新检查
-  const updateCachePath = path.join(app.getPath('userData'), '.update_cache');
-  const stagingDir = path.join(app.getPath('userData'), '__update__');
-  try { fs.rmSync(updateCachePath, { recursive: true, force: true }); } catch {}
-  try { fs.rmSync(stagingDir, { recursive: true, force: true }); } catch {}
+  // const updateCachePath = path.join(app.getPath('userData'), '.update_cache');
+  // const stagingDir = path.join(app.getPath('userData'), '__update__');
+  // try { fs.rmSync(updateCachePath, { recursive: true, force: true }); } catch {}
+  // try { fs.rmSync(stagingDir, { recursive: true, force: true }); } catch {}
 
-  // 延迟 5 秒后自动检查更新
-  setTimeout(() => autoUpdater.checkForUpdates().catch(() => {}), 5000);
+  // setTimeout(() => autoUpdater.checkForUpdates().catch(() => {}), 5000);
 
-  autoUpdater.on('checking-for-update', () => {
-    mainWindow?.webContents.send('update-checking');
-  });
-  autoUpdater.on('update-available', (info) => {
-    mainWindow?.webContents.send('update-available', { version: info.version, releaseDate: info.releaseDate });
-  });
-  autoUpdater.on('update-not-available', () => {
-    mainWindow?.webContents.send('update-not-available');
-  });
-  autoUpdater.on('error', (err) => {
-    console.warn('[autoUpdater] error:', err.message);
-    mainWindow?.webContents.send('update-error', err.message);
-  });
-  autoUpdater.on('download-progress', (progress) => {
-    mainWindow?.webContents.send('update-download-progress', {
-      percent: progress.percent,
-      bytesPerSecond: progress.bytesPerSecond,
-    });
-  });
-  autoUpdater.on('update-downloaded', (info) => {
-    mainWindow?.webContents.send('update-downloaded', { version: info.version });
-  });
+  // autoUpdater.on('checking-for-update', () => {
+  //   mainWindow?.webContents.send('update-checking');
+  // });
+  // autoUpdater.on('update-available', (info) => {
+  //   mainWindow?.webContents.send('update-available', { version: info.version, releaseDate: info.releaseDate });
+  // });
+  // autoUpdater.on('update-not-available', () => {
+  //   mainWindow?.webContents.send('update-not-available');
+  // });
+  // autoUpdater.on('error', (err) => {
+  //   console.warn('[autoUpdater] error:', err.message);
+  //   mainWindow?.webContents.send('update-error', err.message);
+  // });
+  // autoUpdater.on('download-progress', (progress) => {
+  //   mainWindow?.webContents.send('update-download-progress', {
+  //     percent: progress.percent,
+  //     bytesPerSecond: progress.bytesPerSecond,
+  //   });
+  // });
+  // autoUpdater.on('update-downloaded', (info) => {
+  //   mainWindow?.webContents.send('update-downloaded', { version: info.version });
+  // });
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -571,30 +569,30 @@ ipcMain.handle('read-custom-asset-dataurl', async (event, { type, name }) => {
   }
 });
 
-// ========== 自动更新 IPC ==========
-ipcMain.handle('check-for-updates', async () => {
-  try {
-    const updateCachePath = path.join(app.getPath('userData'), '.update_cache');
-    const stagingDir = path.join(app.getPath('userData'), '__update__');
-    try { fs.rmSync(updateCachePath, { recursive: true, force: true }); } catch {}
-    try { fs.rmSync(stagingDir, { recursive: true, force: true }); } catch {}
-    await autoUpdater.checkForUpdates();
-    return { success: true };
-  } catch (err) {
-    return { success: false, error: String(err) };
-  }
-});
+// ========== 自动更新 IPC（已注释）==========
+// ipcMain.handle('check-for-updates', async () => {
+//   try {
+//     const updateCachePath = path.join(app.getPath('userData'), '.update_cache');
+//     const stagingDir = path.join(app.getPath('userData'), '__update__');
+//     try { fs.rmSync(updateCachePath, { recursive: true, force: true }); } catch {}
+//     try { fs.rmSync(stagingDir, { recursive: true, force: true }); } catch {}
+//     await autoUpdater.checkForUpdates();
+//     return { success: true };
+//   } catch (err) {
+//     return { success: false, error: String(err) };
+//   }
+// });
 
-ipcMain.handle('download-update', async () => {
-  try {
-    autoUpdater.downloadUpdate();
-    return { success: true };
-  } catch (err) {
-    return { success: false, error: String(err) };
-  }
-});
+// ipcMain.handle('download-update', async () => {
+//   try {
+//     autoUpdater.downloadUpdate();
+//     return { success: true };
+//   } catch (err) {
+//     return { success: false, error: String(err) };
+//   }
+// });
 
-ipcMain.handle('install-update', () => {
-  autoUpdater.quitAndInstall();
-  return { success: true };
-});
+// ipcMain.handle('install-update', () => {
+//   autoUpdater.quitAndInstall();
+//   return { success: true };
+// });

@@ -13,7 +13,7 @@ import Editor from './components/Editor';
 import BottomBar from './components/BottomBar';
 import SettingsPanel from './components/SettingsPanel';
 import AmbientMusicPlayer from './components/AmbientMusicPlayer';
-import UpdateNotification from './components/UpdateNotification';
+// import UpdateNotification from './components/UpdateNotification';
 import WelcomePage from './components/WelcomePage';
 import { loadCustomConfig, preloadSceneAudio } from './lib/assetResolver';
 
@@ -334,7 +334,7 @@ export default function App() {
       />
 
       {/* Auto Update Notification */}
-      <UpdateNotification />
+      {/* <UpdateNotification /> */}
 
       <TopBar
         isUIVisible={isUIVisible || isSidebarOpen || isSettingsOpen} 
