@@ -55,12 +55,6 @@
       "dist/**/*",
       "electron/**/*"
     ],
-    "extraResources": [
-      {
-        "from": "scripts/InitLume.app",
-        "to": "InitLume.app"
-      }
-    ],
     "mac": {
       "target": "dmg",
       "category": "public.app-category.productivity",

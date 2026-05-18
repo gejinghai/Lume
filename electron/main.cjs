@@ -85,6 +85,41 @@ function parseMarkdownDocument(raw, fallbackId) {
   };
 }
 
+/**
+ * 首次启动时移除 macOS 隔离属性（Gatekeeper 对未签名应用的拦截）。
+ * 仅执行一次，通过 ${userData}/.init_done 标记。
+ */
+function ensureAppNotQuarantined() {
+  if (process.platform !== 'darwin') return;
+  try {
+    const userData = app.getPath('userData');
+    const initFlag = path.join(userData, '.init_done');
+    if (fs.existsSync(initFlag)) return; // 已执行过
+
+    const appPath = app.getPath('exe');
+    // 如果是 .app bundle，取到 .app 目录
+    const bundlePath = appPath.includes('Lume.app')
+      ? appPath.substring(0, appPath.indexOf('Lume.app') + 8)
+      : null;
+
+    if (bundlePath) {
+      const { execSync } = require('child_process');
+      const result = execSync(
+        `xattr -p com.apple.quarantine "${bundlePath}" 2>/dev/null || true`,
+        { encoding: 'utf-8', timeout: 5000 },
+      );
+      if (result.trim()) {
+        execSync(`xattr -dr com.apple.quarantine "${bundlePath}"`, { timeout: 5000 });
+        console.log('[Init] 已移除 quarantine 属性');
+      }
+    }
+
+    fs.writeFileSync(initFlag, new Date().toISOString(), 'utf-8');
+  } catch (err) {
+    console.warn('[Init] ensureAppNotQuarantined 跳过：', err.message);
+  }
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -211,6 +246,8 @@ function createMenu() {
 }
 
 app.whenReady().then(() => {
+  // 首次启动处理（移除隔离属性等）
+  ensureAppNotQuarantined();
   createWindow();
 
   // 自动更新 —— 配置 GitHub Releases 源
