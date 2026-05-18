@@ -1,6 +1,6 @@
 {
   "name": "lume",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A minimalist immersive writing application for macOS",
   "author": "Lume Team",
   "main": "electron/main.cjs",

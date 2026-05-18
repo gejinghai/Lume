@@ -62,6 +62,9 @@ cp "$SCRIPTS_DIR/安装说明.txt" "$TEMP_DIR/"
 # 创建 Applications 快捷方式
 ln -s /Applications "$TEMP_DIR/Applications"
 
+# 清除 TEMP_DIR 所有文件的隔离属性，确保修复脚本可以直接双击运行
+xattr -cr "$TEMP_DIR" 2>/dev/null || true
+
 # 4. 创建 DMG
 echo "[5/5] 创建 DMG 文件..."
 rm -f "$RELEASE_DIR/$DMG_NAME"
