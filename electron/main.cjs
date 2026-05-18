@@ -85,41 +85,6 @@ function parseMarkdownDocument(raw, fallbackId) {
   };
 }
 
-/**
- * 首次启动时移除 macOS 隔离属性（Gatekeeper 对未签名应用的拦截）。
- * 仅执行一次，通过 ${userData}/.init_done 标记。
- */
-function ensureAppNotQuarantined() {
-  if (process.platform !== 'darwin') return;
-  try {
-    const userData = app.getPath('userData');
-    const initFlag = path.join(userData, '.init_done');
-    if (fs.existsSync(initFlag)) return; // 已执行过
-
-    const appPath = app.getPath('exe');
-    // 如果是 .app bundle，取到 .app 目录
-    const bundlePath = appPath.includes('Lume.app')
-      ? appPath.substring(0, appPath.indexOf('Lume.app') + 8)
-      : null;
-
-    if (bundlePath) {
-      const { execSync } = require('child_process');
-      const result = execSync(
-        `xattr -p com.apple.quarantine "${bundlePath}" 2>/dev/null || true`,
-        { encoding: 'utf-8', timeout: 5000 },
-      );
-      if (result.trim()) {
-        execSync(`xattr -dr com.apple.quarantine "${bundlePath}"`, { timeout: 5000 });
-        console.log('[Init] 已移除 quarantine 属性');
-      }
-    }
-
-    fs.writeFileSync(initFlag, new Date().toISOString(), 'utf-8');
-  } catch (err) {
-    console.warn('[Init] ensureAppNotQuarantined 跳过：', err.message);
-  }
-}
-
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -145,10 +110,10 @@ function createWindow() {
 
   if (isDev) {
     mainWindow.loadURL('http://localhost:3000');
-    // mainWindow.webContents.openDevTools();
+     mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
-    // mainWindow.webContents.openDevTools();
+     mainWindow.webContents.openDevTools();
   }
 
   mainWindow.on('closed', () => {
@@ -246,22 +211,18 @@ function createMenu() {
 }
 
 app.whenReady().then(() => {
-  // 首次启动处理（移除隔离属性等）
-  ensureAppNotQuarantined();
   createWindow();
 
-  // 自动更新 —— 配置 GitHub Releases 源
+  // 自动更新 —— 配置 GitHub Releases 源（public 仓库无需 token）
   autoUpdater.setFeedURL({
     provider: 'github',
     owner: 'gejinghai',
     repo: 'Lume',
   });
-  autoUpdater.autoDownload = false; // 只通知用户，让用户选择下载
-  autoUpdater.autoInstallOnAppQuit = false; // 不自动退出安装，由用户手动触发
-  // 启动后静默检查（延迟几秒避免与启动争抢资源）
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = false;
   setTimeout(() => autoUpdater.checkForUpdates().catch(() => {}), 5000);
 
-  // ──── 更新事件 ────
   autoUpdater.on('checking-for-update', () => {
     mainWindow?.webContents.send('update-checking');
   });
@@ -289,26 +250,6 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
-});
-
-// ──── 更新 IPC ────
-ipcMain.handle('check-for-updates', async () => {
-  try {
-    await autoUpdater.checkForUpdates();
-    return { success: true };
-  } catch (err) {
-    return { success: false, error: String(err) };
-  }
-});
-
-ipcMain.handle('download-update', async () => {
-  autoUpdater.downloadUpdate();
-  return { success: true };
-});
-
-ipcMain.handle('install-update', () => {
-  autoUpdater.quitAndInstall();
-  return { success: true };
 });
 
 app.on('window-all-closed', () => {
@@ -612,4 +553,24 @@ ipcMain.handle('read-custom-asset-dataurl', async (event, { type, name }) => {
     console.log('[main] read-custom-asset-dataurl: error', e);
     return null;
   }
+});
+
+// ========== 自动更新 IPC ==========
+ipcMain.handle('check-for-updates', async () => {
+  try {
+    await autoUpdater.checkForUpdates();
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: String(err) };
+  }
+});
+
+ipcMain.handle('download-update', async () => {
+  autoUpdater.downloadUpdate();
+  return { success: true };
+});
+
+ipcMain.handle('install-update', () => {
+  autoUpdater.quitAndInstall();
+  return { success: true };
 });
