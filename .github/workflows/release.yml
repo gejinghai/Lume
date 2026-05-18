@@ -9,6 +9,8 @@ jobs:
   build:
     name: Build
     runs-on: macos-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -24,13 +26,9 @@ jobs:
 
       - name: Build DMG (macOS)
         run: bash scripts/build-dmg.sh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Windows installer (cross-compile)
         run: bash scripts/build-win.sh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -48,5 +46,3 @@ jobs:
             release/latest.yml
             release/latest-mac.yml
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
