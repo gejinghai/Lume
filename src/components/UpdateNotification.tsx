@@ -30,8 +30,8 @@ export default function UpdateNotification() {
       setTimeout(clear, 3000);
     });
     window.electronAPI.onUpdateError((msg) => {
-      setStatus({ type: 'error', message: msg });
-      setTimeout(clear, 5000);
+      console.warn('[Update] Check failed:', msg);
+      // 不显示给用户，静默失败 — 下次启动会重试
     });
     window.electronAPI.onUpdateDownloadProgress((progress) => {
       setStatus({ type: 'downloading', percent: Math.round(progress.percent) });
