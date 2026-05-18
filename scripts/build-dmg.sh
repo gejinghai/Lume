@@ -26,7 +26,7 @@ npm run build
 
 # 2. 打包 Electron
 echo "[2/6] 打包 Electron 应用..."
-ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npx electron-builder -c.publish=null
+ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npx electron-builder --publish=never
 
 # 3. 创建 InitLume.app
 echo "[3/6] 创建首次启动助手..."

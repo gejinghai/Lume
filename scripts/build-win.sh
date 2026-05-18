@@ -24,7 +24,7 @@ npm run build
 
 # 2. 打包 Electron (Windows)
 echo "[2/4] 打包 Electron 应用..."
-ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npx electron-builder --win -c.publish=null
+ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npx electron-builder --win --publish=never
 
 # 3. 清理旧文件
 echo "[3/4] 清理旧文件..."
