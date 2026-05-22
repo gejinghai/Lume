@@ -217,6 +217,13 @@ function createMenu() {
 app.whenReady().then(() => {
   createWindow();
 
+  // F11 全屏切换（Windows/Linux）
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F11') {
+      mainWindow?.setFullScreen(!mainWindow?.isFullScreen());
+    }
+  });
+
   // ========== 自动更新（已注释）==========
   // autoUpdater.setFeedURL({
   //   provider: 'github',
