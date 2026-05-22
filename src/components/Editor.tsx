@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useI18n } from '../lib/i18n';
 
 /**
  * 编辑器组件Props接口
@@ -26,6 +27,7 @@ interface EditorProps {
  * 提供文字清除动画效果
  */
 export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpdateTab }: EditorProps) {
+  const { t } = useI18n();
   // 文本域引用，用于自动调整高度
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
@@ -76,8 +78,8 @@ export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpd
     return (
       <div className="relative w-full h-full glass-panel rounded-xl overflow-hidden flex items-center justify-center">
         <div className="text-center text-on-surface-variant">
-          <div className="text-lg">No document open</div>
-          <div className="text-sm opacity-70 mt-2">Select a document from the sidebar or create a new one.</div>
+          <div className="text-lg">{t('editor.noDocument')}</div>
+          <div className="text-sm opacity-70 mt-2">{t('editor.selectDocument')}</div>
         </div>
       </div>
     );
@@ -97,14 +99,14 @@ export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpd
             value={tab.title}
             onChange={(e) => onUpdateTab(tab.id, { title: e.target.value })}
             className="bg-transparent text-primary text-2xl md:text-3xl font-light tracking-tight mb-3 opacity-90 outline-none text-center w-full placeholder-outline-variant"
-            placeholder="Untitled Document"
+            placeholder={t('editor.titlePlaceholder')}
           />
           <input 
             type="text" 
             value={tab.subtitle}
             onChange={(e) => onUpdateTab(tab.id, { subtitle: e.target.value })}
             className="bg-transparent text-on-surface-variant text-xs font-sans tracking-[0.2em] uppercase opacity-50 italic outline-none text-center w-full"
-            placeholder="Subtitle"
+            placeholder={t('editor.subtitlePlaceholder')}
           />
         </motion.div>
 
@@ -118,7 +120,7 @@ export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpd
             className={`w-full bg-transparent outline-none resize-none text-on-surface text-lg md:text-xl leading-[1.8] placeholder-outline-variant/30 ${
               fontFamily === 'serif' ? 'font-serif' : 'font-sans font-light'
             } ${isClearing ? 'text-transparent caret-transparent select-none' : ''}`}
-            placeholder="Start writing..."
+            placeholder={t('editor.startWriting')}
             style={{ minHeight: '50vh', fontSize: fontSizePx }}
           />
 

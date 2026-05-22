@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useI18n } from '../lib/i18n';
 
 /**
  * BottomBarProps 接口
@@ -17,6 +18,7 @@ interface BottomBarProps {
  * 当鼠标移动时显示，静止3秒后自动隐藏
  */
 export default function BottomBar({ isUIVisible, wordCount = 0, charCount = 0 }: BottomBarProps) {
+  const { t } = useI18n();
   // 当前时间状态
   const [time, setTime] = useState('');
 
@@ -43,11 +45,11 @@ export default function BottomBar({ isUIVisible, wordCount = 0, charCount = 0 }:
         >
           <div className="flex items-center space-x-2">
             <FileText className="w-3.5 h-3.5 opacity-70" />
-            <span>Words: {wordCount.toLocaleString()} | Chars: {charCount.toLocaleString()}</span>
+            <span>{t('bottomBar.words')}: {wordCount.toLocaleString()} | {t('bottomBar.chars')}: {charCount.toLocaleString()}</span>
           </div>
           <div className="flex items-center space-x-2">
             <Clock className="w-3.5 h-3.5 opacity-70" />
-            <span>System: {time}</span>
+            <span>{t('bottomBar.system')}: {time}</span>
           </div>
         </motion.footer>
       )}

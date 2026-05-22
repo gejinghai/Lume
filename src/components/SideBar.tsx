@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Plus, Trash2, FileText, Circle } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { useI18n } from '../lib/i18n';
 import { TabData } from '../App';
 
 /**
@@ -24,6 +25,7 @@ interface SideBarProps {
 export default function SideBar({ 
   isOpen, tabs, activeTabId, onSelectTab, onDeleteTab, onAddTab, onReorderTabs 
 }: SideBarProps) {
+  const { t } = useI18n();
   // 搜索状态
   const [isSearchOpen, setIsSearchOpen] = useState(false);      // 搜索框是否打开
   const [searchQuery, setSearchQuery] = useState('');        // 搜索关键词
@@ -50,8 +52,8 @@ export default function SideBar({
         >
           <div className="px-6 mb-4 flex items-center justify-between">
             <div>
-              <h2 className="text-on-surface font-medium text-sm tracking-wide">Documents</h2>
-              <p className="text-on-surface-variant text-xs tracking-wide opacity-70 mt-0.5">Your Creative Vault</p>
+              <h2 className="text-on-surface font-medium text-sm tracking-wide">{t('sidebar.title')}</h2>
+              <p className="text-on-surface-variant text-xs tracking-wide opacity-70 mt-0.5">{t('sidebar.subtitle')}</p>
             </div>
             <div className="flex space-x-1">
               <button 
@@ -81,7 +83,7 @@ export default function SideBar({
                   <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-70" />
                   <input 
                     type="text" 
-                    placeholder="Search documents..." 
+                    placeholder={t('sidebar.searchPlaceholder')} 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full bg-black/20 border border-outline-variant/20 rounded-lg py-1.5 pl-9 pr-3 text-xs text-on-surface placeholder-on-surface-variant/50 outline-none focus:border-secondary/50 transition-colors"
@@ -107,7 +109,7 @@ export default function SideBar({
                 ))}
                 {filteredTabs.length === 0 && (
                   <div className="text-center text-on-surface-variant text-xs py-8 opacity-50">
-                    No documents found.
+                    {t('sidebar.noDocuments')}
                   </div>
                 )}
               </div>
@@ -153,16 +155,16 @@ export default function SideBar({
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="w-[min(92vw,26rem)] rounded-xl border border-outline-variant/20 bg-surface-highest/45 backdrop-blur-2xl shadow-2xl p-5"
             >
-              <div className="text-on-surface text-sm font-medium">Delete document?</div>
+              <div className="text-on-surface text-sm font-medium">{t('sidebar.deleteConfirm')}</div>
               <div className="text-on-surface-variant text-xs mt-2 leading-relaxed">
-                This will delete "{pendingDeleteTab.title || 'Untitled Document'}" locally. This action cannot be undone.
+                {t('sidebar.deleteWarning').replace('{title}', pendingDeleteTab.title || t('sidebar.untitled'))}
               </div>
               <div className="mt-5 flex items-center justify-end gap-2">
                 <button
                   onClick={() => setPendingDeleteTab(null)}
                   className="px-3 py-1.5 text-xs rounded-md text-on-surface-variant hover:text-on-surface hover:bg-white/10 transition-colors"
                 >
-                  Cancel
+                  {t('sidebar.cancel')}
                 </button>
                 <button
                   onClick={() => {
@@ -171,7 +173,7 @@ export default function SideBar({
                   }}
                   className="px-3 py-1.5 text-xs rounded-md text-red-300 bg-red-500/15 hover:bg-red-500/25 transition-colors"
                 >
-                  Delete
+                  {t('sidebar.delete')}
                 </button>
               </div>
             </motion.div>
@@ -183,6 +185,7 @@ export default function SideBar({
 }
 
 function TabItem({ tab, isActive, onSelect, onDelete }: { tab: TabData, isActive: boolean, onSelect: () => void, onDelete: () => void }) {
+  const { t } = useI18n();
   return (
     <div 
       onClick={onSelect}
@@ -196,20 +199,20 @@ function TabItem({ tab, isActive, onSelect, onDelete }: { tab: TabData, isActive
         <div className="flex items-center space-x-2 overflow-hidden flex-1 min-w-0">
           <Circle className={`w-2 h-2 flex-shrink-0 ${tab.isSaved ? 'fill-transparent text-transparent' : 'fill-secondary text-secondary'}`} />
           <FileText className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-secondary' : 'opacity-50'}`} />
-          <span className="text-sm font-medium truncate min-w-0 mr-6">{tab.title || 'Untitled Document'}</span>
+          <span className="text-sm font-medium truncate min-w-0 mr-6">{tab.title || t('sidebar.untitled')}</span>
         </div>
         <button 
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
           className={`absolute right-2 top-2.5 p-1.5 rounded-md transition-all ${
             isActive ? 'opacity-50 hover:opacity-100 hover:bg-white/10' : 'opacity-0 group-hover:opacity-100 hover:bg-white/10'
           }`}
-          title="Delete Document"
+          title={t('sidebar.deleteDocument')}
         >
           <Trash2 className="w-3.5 h-3.5 hover:text-red-400" />
         </button>
       </div>
       <span className="text-[10px] uppercase tracking-wider opacity-50 truncate pl-5.5">
-        {tab.subtitle || 'NO SUBTITLE'}
+        {tab.subtitle || t('sidebar.noSubtitle')}
       </span>
     </div>
   );

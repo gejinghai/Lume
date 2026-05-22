@@ -16,6 +16,7 @@ import AmbientMusicPlayer from './components/AmbientMusicPlayer';
 // import UpdateNotification from './components/UpdateNotification';
 import WelcomePage from './components/WelcomePage';
 import { loadCustomConfig, preloadSceneAudio } from './lib/assetResolver';
+import { I18nProvider, useI18n } from './lib/i18n';
 
 /**
  * 场景类型 - 定义可用的背景效果
@@ -42,10 +43,20 @@ export interface TabData {
  * 负责整个应用的状态管理和组件协调
  */
 export default function App() {
+  return (
+    <I18nProvider>
+      <AppContent />
+    </I18nProvider>
+  );
+}
+
+function AppContent() {
   // ========== UI 可见性状态 ==========
   const [isUIVisible, setIsUIVisible] = useState(true);           // 控制 UI 元素显示/隐藏
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);       // 侧边栏开关状态
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);      // 设置面板开关状态
+
+  const { t, lang, toggleLang } = useI18n();
 
   // ========== 编辑器设置状态 ==========
   const [fontFamily, setFontFamily] = useState<'sans' | 'serif'>('serif');  // 字体系列
@@ -293,7 +304,7 @@ export default function App() {
   if (isLoading) {
     return (
       <div className="relative w-full h-screen overflow-hidden bg-surface text-on-surface font-sans flex items-center justify-center">
-        <div className="text-on-surface-variant text-sm">Loading...</div>
+        <div className="text-on-surface-variant text-sm">{t('app.loading')}</div>
       </div>
     );
   }
@@ -337,10 +348,12 @@ export default function App() {
       {/* <UpdateNotification /> */}
 
       <TopBar
-        isUIVisible={isUIVisible || isSidebarOpen || isSettingsOpen} 
+        isUIVisible={isUIVisible || isSidebarOpen || isSettingsOpen}
         toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         toggleFont={() => setFontFamily(prev => prev === 'sans' ? 'serif' : 'sans')}
         toggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
+        lang={lang}
+        toggleLang={toggleLang}
         fontFamily={fontFamily}
         editorFontSize={clampedEditorFontSize}
         onEditorFontSizeChange={(size) => setEditorFontSize(Math.min(32, Math.max(14, size)))}

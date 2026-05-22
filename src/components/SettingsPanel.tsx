@@ -5,6 +5,7 @@ import {
   ChevronDown, ChevronRight, Music, Image, FolderOpen, RotateCcw,
 } from 'lucide-react';
 import { loadCustomConfig, getCustomConfig, reloadCustomConfig } from '../lib/assetResolver';
+import { useI18n } from '../lib/i18n';
 
 /**
  * SettingsPanelProps 设置面板组件接口
@@ -37,25 +38,27 @@ interface ResourceItem {
 }
 
 // 每个场景只能修改当前模式下的音效和背景图
-const SCENE_RESOURCES: Record<string, ResourceItem[]> = {
-  rain: [
-    { type: 'sounds', name: 'rain',    label: 'Rain Sound' },
-    { type: 'sounds', name: 'thunder', label: 'Thunder' },
-    { type: 'images', name: 'rain',    label: 'Background Image' },
-  ],
-  snow: [
-    { type: 'sounds', name: 'wind',   label: 'Wind Sound' },
-    { type: 'images', name: 'winter', label: 'Background Image' },
-  ],
-  stars: [
-    { type: 'sounds', name: 'nightsound', label: 'Night Sound' },
-    { type: 'sounds', name: 'cricket',    label: 'Cricket' },
-    { type: 'images', name: 'stars',     label: 'Background Image' },
-  ],
-  aurora: [
-    { type: 'images', name: 'aurora', label: 'Background Image' },
-  ],
-};
+function getSceneResources(t: (key: string) => string): Record<string, ResourceItem[]> {
+  return {
+    rain: [
+      { type: 'sounds', name: 'rain',    label: t('res.rainSound') },
+      { type: 'sounds', name: 'thunder', label: t('res.thunder') },
+      { type: 'images', name: 'rain',    label: t('res.backgroundImage') },
+    ],
+    snow: [
+      { type: 'sounds', name: 'wind',   label: t('res.windSound') },
+      { type: 'images', name: 'winter', label: t('res.backgroundImage') },
+    ],
+    stars: [
+      { type: 'sounds', name: 'nightsound', label: t('res.nightSound') },
+      { type: 'sounds', name: 'cricket',    label: t('res.cricket') },
+      { type: 'images', name: 'stars',     label: t('res.backgroundImage') },
+    ],
+    aurora: [
+      { type: 'images', name: 'aurora', label: t('res.backgroundImage') },
+    ],
+  };
+}
 
 const ICONS: Record<string, React.ReactNode> = {
   sounds: <Music className="w-3.5 h-3.5" />,
@@ -73,9 +76,10 @@ export default function SettingsPanel({
   auroraCount, setAuroraCount,
   scene, onCustomResourceChange,
 }: SettingsPanelProps) {
+  const { t } = useI18n();
   const isWeatherScene = scene === 'rain' || scene === 'snow';
   const isElectron = typeof window !== 'undefined' && window.electronAPI;
-  const sceneResources = SCENE_RESOURCES[scene] ?? [];
+  const sceneResources = getSceneResources(t)[scene] ?? [];
 
   // 自定义资源状态
   const [customOpen, setCustomOpen] = useState(false);
@@ -192,7 +196,7 @@ export default function SettingsPanel({
           className="fixed top-16 right-4 w-80 bg-surface-highest/50 backdrop-blur-3xl border border-outline-variant/20 rounded-xl shadow-2xl z-50 overflow-y-auto max-h-[calc(100vh-5rem)]"
         >
           <div className="flex items-center justify-between p-4 border-b border-outline-variant/10">
-            <h3 className="text-sm font-medium text-on-surface">Environment Settings</h3>
+            <h3 className="text-sm font-medium text-on-surface">{t('settings.title')}</h3>
             <button
               onClick={onClose}
               className="p-1 text-on-surface-variant hover:text-on-surface hover:bg-white/10 rounded-md transition-colors"
@@ -208,7 +212,7 @@ export default function SettingsPanel({
                 <div className="flex items-center justify-between text-xs text-on-surface-variant">
                   <div className="flex items-center space-x-2">
                     {scene === 'snow' ? <Snowflake className="w-3.5 h-3.5" /> : <CloudRain className="w-3.5 h-3.5" />}
-                    <span>{scene === 'snow' ? 'Snow' : 'Rain'} Intensity</span>
+                    <span>{scene === 'snow' ? t('settings.snowIntensity') : t('settings.rainIntensity')}</span>
                   </div>
                   <span>{Math.round(rainIntensity * 100)}%</span>
                 </div>
@@ -227,7 +231,7 @@ export default function SettingsPanel({
               <div className="flex items-center justify-between text-xs text-on-surface-variant">
                 <div className="flex items-center space-x-2">
                   <Volume2 className="w-3.5 h-3.5" />
-                  <span>Background Volume</span>
+                  <span>{t('settings.volume')}</span>
                 </div>
                 <span>{Math.round(volume * 100)}%</span>
               </div>
@@ -245,7 +249,7 @@ export default function SettingsPanel({
               <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center space-x-2 text-xs text-on-surface-variant">
                   <Zap className="w-3.5 h-3.5" />
-                  <span>Enable Thunder</span>
+                  <span>{t('settings.enableThunder')}</span>
                 </div>
                 <button
                   onClick={() => setThunderEnabled(!thunderEnabled)}
@@ -266,7 +270,7 @@ export default function SettingsPanel({
                 <div className="flex items-center justify-between text-xs text-on-surface-variant">
                   <div className="flex items-center space-x-2">
                     <Star className="w-3.5 h-3.5" />
-                    <span>Star Density</span>
+                    <span>{t('settings.starDensity')}</span>
                   </div>
                   <span>{starDensity}</span>
                 </div>
@@ -286,7 +290,7 @@ export default function SettingsPanel({
                 <div className="flex items-center justify-between text-xs text-on-surface-variant">
                   <div className="flex items-center space-x-2">
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>Aurora Density</span>
+                    <span>{t('settings.auroraDensity')}</span>
                   </div>
                   <span>{auroraCount}</span>
                 </div>
@@ -305,7 +309,7 @@ export default function SettingsPanel({
               <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center space-x-2 text-xs text-on-surface-variant">
                   {scene === 'stars' ? <Moon className="w-3.5 h-3.5" /> : <CloudRain className="w-3.5 h-3.5" />}
-                  <span>{scene === 'stars' ? 'Night Sounds (Frogs/Crickets)' : 'White Noise (Rain/Wind)'}</span>
+                  <span>{scene === 'stars' ? t('settings.nightSounds') : t('settings.whiteNoise')}</span>
                 </div>
                 <button
                   onClick={() => setWhiteNoiseEnabled(!whiteNoiseEnabled)}
@@ -324,7 +328,7 @@ export default function SettingsPanel({
             <div className="flex items-center justify-between pt-2">
               <div className="flex items-center space-x-2 text-xs text-on-surface-variant">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Ambient Sounds (Music)</span>
+                <span>{t('settings.ambientSounds')}</span>
               </div>
               <button
                 onClick={() => setAmbientSoundsEnabled(!ambientSoundsEnabled)}
@@ -346,7 +350,7 @@ export default function SettingsPanel({
                 onClick={() => setCustomOpen(!customOpen)}
                 className="w-full flex items-center justify-between px-5 py-3 text-xs font-medium text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-colors"
               >
-                <span>Custom Resources</span>
+                <span>{t('settings.customResources')}</span>
                 {customOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
               </button>
 
@@ -377,21 +381,21 @@ export default function SettingsPanel({
                                   {customFile}
                                 </span>
                               ) : (
-                                <span className="text-[10px] text-outline-variant">Default</span>
+                                <span className="text-[10px] text-outline-variant">{t('settings.default')}</span>
                               )}
                               <button
                                 onClick={() => handleReplace(res)}
                                 disabled={isLoading}
                                 className="px-2 py-1 text-[10px] rounded-md bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-on-surface transition-colors disabled:opacity-30"
                               >
-                                {isLoading ? '...' : 'Replace'}
+                                {isLoading ? '...' : t('settings.replace')}
                               </button>
                               {customFile && (
                                 <button
                                   onClick={() => handleReset(res)}
                                   disabled={isLoading}
                                   className="p-1 text-outline-variant hover:text-red-400 transition-colors disabled:opacity-30"
-                                  title="Restore default"
+                                  title={t('settings.restoreDefault')}
                                 >
                                   <RotateCcw className="w-3 h-3" />
                                 </button>
@@ -402,7 +406,7 @@ export default function SettingsPanel({
                       })
                       ) : (
                         <div className="py-4 text-center text-[11px] text-outline-variant">
-                          No replaceable resources for this scene
+                          {t('settings.noResources')}
                         </div>
                       )}
 
@@ -412,7 +416,7 @@ export default function SettingsPanel({
                           className="flex items-center space-x-1.5 px-3 py-1.5 text-[10px] rounded-md bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-on-surface transition-colors"
                         >
                           <FolderOpen className="w-3 h-3" />
-                          <span>Open Folder</span>
+                          <span>{t('settings.openFolder')}</span>
                         </button>
                         {sceneResources.length > 0 && (
                           <button
@@ -420,7 +424,7 @@ export default function SettingsPanel({
                             className="flex items-center space-x-1.5 px-3 py-1.5 text-[10px] rounded-md bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-red-400 transition-colors"
                           >
                             <RotateCcw className="w-3 h-3" />
-                            <span>Restore All</span>
+                            <span>{t('settings.restoreAll')}</span>
                           </button>
                         )}
                       </div>

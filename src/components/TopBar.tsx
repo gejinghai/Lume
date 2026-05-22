@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Settings, PanelLeft, Type, CloudRain, Snowflake, Star, Waves, X, Plus, Circle, ChevronDown } from 'lucide-react';
+import { Languages, Settings, PanelLeft, Type, CloudRain, Snowflake, Star, Waves, X, Plus, Circle, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { useI18n } from '../lib/i18n';
 
 /**
  * TopBarProps 顶部标签栏组件接口
@@ -16,17 +17,19 @@ interface TopBarProps {
   scene: 'rain' | 'snow' | 'stars' | 'aurora';  // 当前场景类型
   setScene: (scene: 'rain' | 'snow' | 'stars' | 'aurora') => void;  // 场景切换回调
   tabs: {                                  // 标签页列表
-    id: string; 
-    title: string; 
-    subtitle: string; 
-    content: string; 
-    isSaved?: boolean 
+    id: string;
+    title: string;
+    subtitle: string;
+    content: string;
+    isSaved?: boolean
   }[];
   activeTabId: string | null;               // 当前活动标签 ID
   onReorderTabs: (newTabs: { id: string; title: string; subtitle: string; content: string; isSaved?: boolean }[]) => void;  // 标签排序回调
   onSelectTab: (id: string) => void;        // 选择标签回调
   onCloseTab: (id: string) => void;        // 关闭标签回调
   onAddTab: () => void;                   // 新建标签回调
+  lang: 'en' | 'zh';                      // 当前语言
+  toggleLang: () => void;                 // 切换语言
 }
 
 /**
@@ -34,11 +37,13 @@ interface TopBarProps {
  * 显示文档标签页，支持拖拽排序、场景切换、字体设置
  * 使用 Framer Motion 实现标签拖拽动画
  */
-export default function TopBar({ 
+export default function TopBar({
   isUIVisible, toggleSidebar, toggleFont, toggleSettings, fontFamily, scene, setScene,
   editorFontSize, onEditorFontSizeChange,
-  tabs, activeTabId, onReorderTabs, onSelectTab, onCloseTab, onAddTab
+  tabs, activeTabId, onReorderTabs, onSelectTab, onCloseTab, onAddTab,
+  lang, toggleLang
 }: TopBarProps) {
+  const { t } = useI18n();
   // 标签滚动区域引用
   const tabsScrollRef = useRef<HTMLDivElement>(null);
   // 上一个标签数量引用（用于检测新标签）
@@ -162,27 +167,27 @@ export default function TopBar({
           </div>
 
           <div className="flex items-center justify-end space-x-2 w-1/4 flex-shrink-0" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-            <button 
+            <button
               onClick={toggleSidebar}
               className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-md transition-colors flex items-center space-x-1"
-              title="Toggle Sidebar"
+              title={t('topbar.toggleSidebar')}
             >
               <PanelLeft className="w-4 h-4" />
             </button>
             <button 
               onClick={cycleScene}
               className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-md transition-colors flex items-center space-x-1"
-              title="Change Scene"
+              title={t('topbar.changeScene')}
             >
               <SceneIcon className="w-4 h-4" />
             </button>
             <button 
               onClick={toggleFont}
               className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-md transition-colors flex items-center space-x-1"
-              title={`Switch to ${fontFamily === 'sans' ? 'Serif' : 'Sans-serif'}`}
+              title={fontFamily === 'sans' ? t('topbar.switchFont') : t('topbar.switchFont.serif')}
             >
               <Type className="w-4 h-4" />
-              <span className="text-[10px] uppercase font-sans tracking-wider opacity-70">{fontFamily}</span>
+              <span className="text-[10px] uppercase font-sans tracking-wider opacity-70">{fontFamily === 'sans' ? t('topbar.sans') : t('topbar.serif')}</span>
             </button>
             <div className="relative flex items-center" ref={dropdownRef}>
               <Type className="w-3.5 h-3.5 text-on-surface-variant opacity-70 mr-1" />
@@ -223,9 +228,18 @@ export default function TopBar({
                 )} 
               </AnimatePresence> 
             </div>
-            <button 
+            <button
+              onClick={toggleLang}
+              className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-md transition-colors flex items-center space-x-1"
+              title={lang === 'en' ? 'Switch to Chinese' : '切换到英文'}
+            >
+              <Languages className="w-4 h-4" />
+              <span className="text-[10px] font-medium tracking-wider opacity-70">{lang === 'en' ? 'EN' : '中'}</span>
+            </button>
+            <button
               onClick={toggleSettings}
               className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-md transition-colors"
+              title={t('topbar.settings')}
             >
               <Settings className="w-4 h-4" />
             </button>
