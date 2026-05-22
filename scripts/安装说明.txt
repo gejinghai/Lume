@@ -29,6 +29,6 @@ A: 不需要，只有首次安装时需要。
 
 如果修复工具无法使用，可以打开终端（Terminal.app）输入：
 
-    sudo xattr -rd com.apple.quarantine /Applications/Lume.app
+sudo xattr -rd com.apple.quarantine /Applications/Lume.app
 
 ========================================================

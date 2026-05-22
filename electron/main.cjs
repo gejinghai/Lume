@@ -218,9 +218,15 @@ app.whenReady().then(() => {
   createWindow();
 
   // F11 全屏切换（Windows/Linux）
+  let lastF11Time = 0;
   mainWindow.webContents.on('before-input-event', (event, input) => {
     if (input.key === 'F11') {
-      mainWindow?.setFullScreen(!mainWindow?.isFullScreen());
+      event.preventDefault();
+      const now = Date.now();
+      if (now - lastF11Time > 400) {
+        lastF11Time = now;
+        mainWindow?.setFullScreen(!mainWindow?.isFullScreen());
+      }
     }
   });
 
