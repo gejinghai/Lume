@@ -155,7 +155,7 @@ function AppContent() {
 
   useEffect(() => {
     const init = async () => {
-      const [docs, settings] = await Promise.all([
+      const [docs, , settings] = await Promise.all([
         loadDocuments(),
         loadCustomConfig(),
         loadSettings(),
