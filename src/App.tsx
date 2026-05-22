@@ -17,6 +17,8 @@ import AmbientMusicPlayer from './components/AmbientMusicPlayer';
 import WelcomePage from './components/WelcomePage';
 import { loadCustomConfig, preloadSceneAudio } from './lib/assetResolver';
 import { I18nProvider, useI18n } from './lib/i18n';
+import { loadSettings, saveSettings, DEFAULT_SETTINGS } from './lib/settings';
+import type { AppSettings } from './lib/settings';
 
 /**
  * 场景类型 - 定义可用的背景效果
@@ -56,7 +58,7 @@ function AppContent() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);       // 侧边栏开关状态
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);      // 设置面板开关状态
 
-  const { t, lang, toggleLang } = useI18n();
+  const { t, lang, setLang, toggleLang } = useI18n();
 
   // ========== 编辑器设置状态 ==========
   const [fontFamily, setFontFamily] = useState<'sans' | 'serif'>('serif');  // 字体系列
@@ -84,6 +86,8 @@ function AppContent() {
 
   // ========== 应用加载状态 ==========
   const [isLoading, setIsLoading] = useState(true);              // 是否正在加载
+  // 设置是否已从持久化存储中加载（用于防止初始化覆盖）
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   // ========== 文档管理状态 ==========
   const [documents, setDocuments] = useState<TabData[]>([]);       // 所有文档列表
@@ -151,11 +155,28 @@ function AppContent() {
 
   useEffect(() => {
     const init = async () => {
-      const [docs] = await Promise.all([
+      const [docs, settings] = await Promise.all([
         loadDocuments(),
         loadCustomConfig(),
+        loadSettings(),
       ]);
       setDocuments(docs);
+
+      // 应用持久化的设置
+      const s = { ...DEFAULT_SETTINGS, ...settings };
+      if (s.fontFamily) setFontFamily(s.fontFamily);
+      if (s.editorFontSize) setEditorFontSize(s.editorFontSize);
+      if (s.scene) setScene(s.scene);
+      if (s.rainIntensity !== undefined) setRainIntensity(s.rainIntensity);
+      if (s.thunderEnabled !== undefined) setThunderEnabled(s.thunderEnabled);
+      if (s.starDensity !== undefined) setStarDensity(s.starDensity);
+      if (s.whiteNoiseEnabled !== undefined) setWhiteNoiseEnabled(s.whiteNoiseEnabled);
+      if (s.ambientSoundsEnabled !== undefined) setAmbientSoundsEnabled(s.ambientSoundsEnabled);
+      if (s.volume !== undefined) setVolume(s.volume);
+      if (s.auroraCount !== undefined) setAuroraCount(s.auroraCount);
+      if (s.lang) setLang(s.lang);
+
+      setSettingsLoaded(true);
       setIsLoading(false);
 
       // 音频预加载在 UI 渲染之后进行，不阻塞启动
@@ -163,6 +184,25 @@ function AppContent() {
     };
     init();
   }, [loadDocuments]);
+
+  // 设置变更时自动持久化
+  useEffect(() => {
+    if (!settingsLoaded) return;
+    const timeout = setTimeout(() => {
+      void saveSettings({
+        fontFamily, editorFontSize, scene,
+        rainIntensity, thunderEnabled, starDensity,
+        whiteNoiseEnabled, ambientSoundsEnabled, volume,
+        auroraCount, lang,
+      });
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [
+    settingsLoaded, fontFamily, editorFontSize, scene,
+    rainIntensity, thunderEnabled, starDensity,
+    whiteNoiseEnabled, ambientSoundsEnabled, volume,
+    auroraCount, lang,
+  ]);
 
   useEffect(() => {
     if (!isElectron) return;

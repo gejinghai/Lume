@@ -39,6 +39,10 @@ export interface ElectronAPI {
   
   removeAllListeners: (channel: string) => void;
 
+  // 设置持久化
+  saveSettings: (settings: Record<string, unknown>) => Promise<{ success: boolean; error?: string }>;
+  loadSettings: () => Promise<Record<string, unknown>>;
+
   // 自动更新
   checkForUpdates: () => Promise<{ success: boolean; error?: string }>;
   downloadUpdate: () => Promise<{ success: boolean }>;

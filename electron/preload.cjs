@@ -51,6 +51,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openFolder: (folderPath) => ipcRenderer.invoke('open-folder', folderPath),
   readCustomAssetDataUrl: (data) => ipcRenderer.invoke('read-custom-asset-dataurl', data),
 
+  // ========== 设置持久化 API ==========
+  saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
+  loadSettings: () => ipcRenderer.invoke('load-settings'),
+
   // 移除所有监听器
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
 

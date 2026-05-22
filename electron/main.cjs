@@ -569,6 +569,38 @@ ipcMain.handle('read-custom-asset-dataurl', async (event, { type, name }) => {
   }
 });
 
+// ========== 设置持久化 API ==========
+
+const settingsPath = path.join(app.getPath('userData'), 'settings.json');
+
+function readSettings() {
+  try {
+    if (fs.existsSync(settingsPath)) {
+      return JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+    }
+  } catch (e) { /* ignore */ }
+  return {};
+}
+
+function writeSettings(settings) {
+  const dir = path.dirname(settingsPath);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8');
+}
+
+ipcMain.handle('save-settings', async (event, settings) => {
+  try {
+    writeSettings(settings);
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+});
+
+ipcMain.handle('load-settings', async () => {
+  return readSettings();
+});
+
 // ========== 自动更新 IPC（已注释）==========
 // ipcMain.handle('check-for-updates', async () => {
 //   try {
