@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useI18n } from '../lib/i18n';
+import { getFont } from '../lib/fonts';
 
 /**
  * 编辑器组件Props接口
  */
 interface EditorProps {
-  fontFamily: 'sans' | 'serif';       // 字体系列：sans-无衬线，serif-衬线
+  fontFamily: string;                  // 字体 ID
   isUIVisible: boolean;               // UI是否可见（用于控制清除按钮显示）
   tab: {                              // 当前文档标签
     id: string;                       // 文档ID
@@ -117,11 +118,11 @@ export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpd
             onChange={(e) => onUpdateTab(tab.id, { content: e.target.value })}
             spellCheck={false}
             readOnly={isClearing}
-            className={`w-full bg-transparent outline-none resize-none text-on-surface text-lg md:text-xl leading-[1.8] placeholder-outline-variant/30 ${
-              fontFamily === 'serif' ? 'font-serif' : 'font-sans font-light'
-            } ${isClearing ? 'text-transparent caret-transparent select-none' : ''}`}
+            className={`w-full bg-transparent outline-none resize-none text-on-surface text-lg md:text-xl leading-[1.8] placeholder-outline-variant/30 font-light ${
+              isClearing ? 'text-transparent caret-transparent select-none' : ''
+            }`}
             placeholder={t('editor.startWriting')}
-            style={{ minHeight: '50vh', fontSize: fontSizePx }}
+            style={{ minHeight: '50vh', fontSize: fontSizePx, fontFamily: getFont(fontFamily).family }}
           />
 
           <AnimatePresence>
@@ -130,10 +131,8 @@ export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpd
                 initial={{ opacity: 1 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className={`pointer-events-none absolute inset-0 whitespace-pre-wrap break-words text-on-surface text-lg md:text-xl leading-[1.8] ${
-                  fontFamily === 'serif' ? 'font-serif' : 'font-sans font-light'
-                }`}
-                style={{ fontSize: fontSizePx }}
+                className={`pointer-events-none absolute inset-0 whitespace-pre-wrap break-words text-on-surface text-lg md:text-xl leading-[1.8] font-light`}
+                style={{ fontSize: fontSizePx, fontFamily: getFont(fontFamily).family }}
               >
                 {clearingText.split('').map((char, index, arr) => {
                   const reverseIndex = arr.length - 1 - index;

@@ -19,6 +19,7 @@ import { loadCustomConfig, preloadSceneAudio } from './lib/assetResolver';
 import { I18nProvider, useI18n } from './lib/i18n';
 import { loadSettings, saveSettings, DEFAULT_SETTINGS } from './lib/settings';
 import type { AppSettings } from './lib/settings';
+import { getFont, DEFAULT_FONT_ID } from './lib/fonts';
 
 /**
  * 场景类型 - 定义可用的背景效果
@@ -61,7 +62,7 @@ function AppContent() {
   const { t, lang, setLang, toggleLang } = useI18n();
 
   // ========== 编辑器设置状态 ==========
-  const [fontFamily, setFontFamily] = useState<'sans' | 'serif'>('serif');  // 字体系列
+  const [fontFamily, setFontFamily] = useState(DEFAULT_FONT_ID);  // 字体 ID
   const [editorFontSize, setEditorFontSize] = useState(14);       // 编辑器字体大小
 
   // ========== 场景与背景状态 ==========
@@ -390,11 +391,11 @@ function AppContent() {
       <TopBar
         isUIVisible={isUIVisible || isSidebarOpen || isSettingsOpen}
         toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-        toggleFont={() => setFontFamily(prev => prev === 'sans' ? 'serif' : 'sans')}
         toggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
         lang={lang}
         toggleLang={toggleLang}
         fontFamily={fontFamily}
+        onFontFamilyChange={(id) => setFontFamily(id)}
         editorFontSize={clampedEditorFontSize}
         onEditorFontSizeChange={(size) => setEditorFontSize(Math.min(32, Math.max(14, size)))}
         scene={scene}

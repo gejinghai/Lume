@@ -1,11 +1,12 @@
 import type { SceneType } from '../App';
+import { DEFAULT_FONT_ID } from './fonts';
 
 /**
  * AppSettings 应用设置接口
  * 所有用户可配置的设置项
  */
 export interface AppSettings {
-  fontFamily?: 'sans' | 'serif';
+  fontFamily?: string;
   editorFontSize?: number;
   scene?: SceneType;
   rainIntensity?: number;
@@ -22,7 +23,7 @@ export interface AppSettings {
  * 设置默认值
  */
 export const DEFAULT_SETTINGS: AppSettings = {
-  fontFamily: 'serif',
+  fontFamily: DEFAULT_FONT_ID,
   editorFontSize: 14,
   scene: 'rain',
   rainIntensity: 0.6,
