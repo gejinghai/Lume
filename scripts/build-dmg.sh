@@ -2,25 +2,38 @@
 
 # Lume 一键打包 DMG + ZIP 脚本
 # 生成 DMG（手动安装用）和 ZIP（自动更新用，含签名）
-# 用法: ./build-dmg.sh
+# 用法: ./build-dmg.sh          # 默认 arm64
+#       ./build-dmg.sh x64      # Intel 芯片
+#       ./build-dmg.sh arm64    # Apple 芯片
 
 set -e
+
+# 架构参数
+ARCH="${1:-arm64}"
+if [ "$ARCH" != "arm64" ] && [ "$ARCH" != "x64" ]; then
+  echo "用法: $0 [arm64|x64]"
+  exit 1
+fi
+
+# electron-builder 输出子目录名
+BUILD_DIR="mac-${ARCH}"
 
 # 从脚本所在目录推导项目根目录
 SCRIPTS_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPTS_DIR/.." && pwd)"
 RELEASE_DIR="$PROJECT_DIR/release"
-TEMP_DIR="/tmp/Lume_DMG"
+TEMP_DIR="/tmp/Lume_DMG_${ARCH}"
 
 # 读取版本号
 VERSION=$(node -p "require('$PROJECT_DIR/package.json').version")
-DMG_NAME="Lume-${VERSION}-arm64.dmg"
+DMG_NAME="Lume-${VERSION}-${ARCH}.dmg"
 # electron-builder 生成的 ZIP 文件名（自动更新用）
-AUTO_ZIP_NAME="Lume-${VERSION}-arm64-mac.zip"
+AUTO_ZIP_NAME="Lume-${VERSION}-${ARCH}-mac.zip"
 
 echo "========== 开始打包 =========="
 echo "项目目录: $PROJECT_DIR"
 echo "版本: $VERSION"
+echo "架构: $ARCH"
 
 # 1. 构建 Vite
 echo "[1/5] 构建 Vite..."
@@ -29,19 +42,19 @@ npm run build
 
 # 2. 打包 Electron（生成 .app + DMG + ZIP + latest-mac.yml）
 echo "[2/5] 打包 Electron 应用..."
-ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npx electron-builder --publish=never
+ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npx electron-builder --mac --"$ARCH" --publish=never
 
 # 3. 用 electron-builder 已签名的 app 重新打包 ZIP
 # 注意：electron-builder 会自动检测本地证书签名（见上一步日志中的 signing identity）
 # 我们只需用同款 app 重新打包 ZIP + 更新校验值即可
 echo "[3/5] 重新打包 ZIP（保留 electron-builder 的签名）..."
-APP_PATH="$RELEASE_DIR/mac-arm64/Lume.app"
+APP_PATH="$RELEASE_DIR/$BUILD_DIR/Lume.app"
 if [ -d "$APP_PATH" ]; then
   echo "  ✓ 验证签名: $(codesign -dv "$APP_PATH" 2>&1 | grep 'Authority=' || echo 'ad-hoc')"
 
   # 用已签名的 app 重新打包 ZIP（覆盖 electron-builder 生成的）
   rm -f "$RELEASE_DIR/$AUTO_ZIP_NAME"
-  cd "$RELEASE_DIR/mac-arm64"
+  cd "$RELEASE_DIR/$BUILD_DIR"
   zip -r -y "$RELEASE_DIR/$AUTO_ZIP_NAME" "Lume.app" -x "*.DS_Store"
   cd "$PROJECT_DIR"
 
@@ -66,7 +79,7 @@ rm -rf "$TEMP_DIR"
 mkdir -p "$TEMP_DIR"
 
 # 复制 Lume.app
-cp -R "$RELEASE_DIR/mac-arm64/Lume.app" "$TEMP_DIR/"
+cp -R "$RELEASE_DIR/$BUILD_DIR/Lume.app" "$TEMP_DIR/"
 
 # 复制首次启动修复工具和安装说明
 cp "$SCRIPTS_DIR/修复-首次启动.command" "$TEMP_DIR/"
