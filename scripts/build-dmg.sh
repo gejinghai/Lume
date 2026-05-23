@@ -15,8 +15,8 @@ if [ "$ARCH" != "arm64" ] && [ "$ARCH" != "x64" ]; then
   exit 1
 fi
 
-# electron-builder 输出子目录名
-BUILD_DIR="mac-${ARCH}"
+# electron-builder 单架构输出始终在 mac/
+BUILD_DIR="mac"
 
 # 从脚本所在目录推导项目根目录
 SCRIPTS_DIR="$(cd "$(dirname "$0")" && pwd)"
