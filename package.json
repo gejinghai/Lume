@@ -56,10 +56,7 @@
     ],
     "extraResources": [],
     "mac": {
-      "target": [
-        "dmg",
-        "zip"
-      ],
+      "target": "dmg",
       "category": "public.app-category.productivity",
       "icon": "public/images/logo.png"
     },
