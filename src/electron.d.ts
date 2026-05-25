@@ -7,10 +7,11 @@ export interface CustomResourceConfig {
 export interface ElectronAPI {
   saveDocumentsOrder: (order: string[]) => Promise<boolean>;
   getUserDataPath: () => Promise<string>;
-  saveDocument: (doc: { id: string; title: string; subtitle: string; content: string }) => Promise<string>;
-  loadDocuments: () => Promise<Array<{ id: string; title: string; subtitle: string; content: string; updatedAt?: string }>>;
+  saveDocument: (doc: { id: string; title: string; subtitle: string; content: string; collection?: string }) => Promise<string>;
+  loadDocuments: () => Promise<Array<{ id: string; title: string; subtitle: string; content: string; collection?: string; updatedAt?: string }>>;
   deleteDocument: (id: string) => Promise<boolean>;
-  showSaveDialog: () => Promise<{ canceled: boolean; filePath?: string }>;
+  showSaveDialog: (defaultName?: string) => Promise<{ canceled: boolean; filePath?: string }>;
+  showDirectoryDialog: () => Promise<{ canceled: boolean; directoryPath?: string }>;
   exportDocument: (data: { filePath: string; content: string }) => Promise<{ success: boolean; error?: string }>;
   getWindowState: () => Promise<{ isMaximized: boolean; isFullScreen: boolean }>;
   minimizeWindow: () => void;
@@ -40,6 +41,9 @@ export interface ElectronAPI {
   removeAllListeners: (channel: string) => void;
 
   // 设置持久化
+  saveCollections: (collections: string[]) => Promise<boolean>;
+  loadCollections: () => Promise<string[]>;
+
   saveSettings: (settings: Record<string, unknown>) => Promise<{ success: boolean; error?: string }>;
   loadSettings: () => Promise<Record<string, unknown>>;
 

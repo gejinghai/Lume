@@ -14,37 +14,55 @@ let mainWindow = null;
 const isDev = false;
 
 /**
- * 转义 YAML 属性的值
- * 处理换行符和引号，确保安全写入文件
- * @param {string} value - 要转义的值
- * @returns {string} 转义后的值
- */
-function escapeFrontmatterValue(value = '') {
-  return String(value).replace(/\r?\n/g, ' ').replace(/"/g, '\\"');
-}
-
-/**
- * 将文档对象转换为 Markdown 格式
- * 使用 YAML frontmatter 存储元数据
+ * 将文档对象转换为 JSON 格式
  * @param {Object} param0 - 文档对象
- * @returns {string} Markdown 格式的文档字符串
+ * @returns {string} JSON 字符串
  */
-function toMarkdownDocument({ id, title, subtitle, content, updatedAt }) {
-  const safeId = escapeFrontmatterValue(id);
-  const safeTitle = escapeFrontmatterValue(title || 'Untitled Document');
-  const safeSubtitle = escapeFrontmatterValue(subtitle || 'NEW DRAFT');
-  const safeUpdatedAt = escapeFrontmatterValue(updatedAt || new Date().toISOString());
-  const body = content || '';
-
-  return `---\nid: "${safeId}"\ntitle: "${safeTitle}"\nsubtitle: "${safeSubtitle}"\nupdatedAt: "${safeUpdatedAt}"\n---\n\n${body}`;
+function toJsonDocument({ id, title, subtitle, content, collection, updatedAt }) {
+  const doc = {
+    id: String(id || ''),
+    title: String(title || 'Untitled Document'),
+    subtitle: String(subtitle || 'NEW DRAFT'),
+    content: String(content || ''),
+    updatedAt: updatedAt || new Date().toISOString(),
+  };
+  if (collection) doc.collection = String(collection);
+  return JSON.stringify(doc, null, 2);
 }
 
 /**
- * 解析 Markdown 文档
- * 从 YAML frontmatter 中提取元数据
+ * 解析 JSON 文档文件
+ * @param {string} raw - JSON 内容
+ * @param {string} fallbackId - 备用 ID
+ * @returns {Object} 文档对象
+ */
+function parseJsonDocument(raw, fallbackId) {
+  try {
+    const doc = JSON.parse(raw);
+    return {
+      id: doc.id || fallbackId,
+      title: doc.title || 'Untitled Document',
+      subtitle: doc.subtitle || 'NEW DRAFT',
+      content: doc.content || '',
+      collection: doc.collection || undefined,
+      updatedAt: doc.updatedAt,
+    };
+  } catch (e) {
+    return {
+      id: fallbackId,
+      title: 'Untitled Document',
+      subtitle: 'NEW DRAFT',
+      content: raw,
+      updatedAt: undefined,
+    };
+  }
+}
+
+/**
+ * 解析旧版 Markdown 文档（兼容迁移）
  * @param {string} raw - 原始 Markdown 内容
- * @param {string} fallbackId - 备用 ID（当无法解析时使用）
- * @returns {Object} 解析后的文档对象
+ * @param {string} fallbackId - 备用 ID
+ * @returns {Object} 文档对象
  */
 function parseMarkdownDocument(raw, fallbackId) {
   const normalized = String(raw || '');
@@ -289,19 +307,19 @@ ipcMain.handle('get-user-data-path', () => {
   return app.getPath('userData');
 });
 
-ipcMain.handle('save-document', async (event, { id, title, subtitle, content }) => {
+ipcMain.handle('save-document', async (event, { id, title, subtitle, content, collection }) => {
   const userDataPath = app.getPath('userData');
   const documentsPath = path.join(userDataPath, 'documents');
-  
+
   if (!fs.existsSync(documentsPath)) {
     fs.mkdirSync(documentsPath, { recursive: true });
   }
-  
-  const docPath = path.join(documentsPath, `${id}.md`);
-  const updatedAt = new Date().toISOString();
-  const markdown = toMarkdownDocument({ id, title, subtitle, content, updatedAt });
 
-  fs.writeFileSync(docPath, markdown, 'utf-8');
+  const docPath = path.join(documentsPath, `${id}.json`);
+  const updatedAt = new Date().toISOString();
+  const json = toJsonDocument({ id, title, subtitle, content, collection, updatedAt });
+
+  fs.writeFileSync(docPath, json, 'utf-8');
   return docPath;
 });
 
@@ -313,9 +331,11 @@ ipcMain.handle('load-documents', async () => {
     return [];
   }
 
-  const files = fs.readdirSync(documentsPath).filter(f => f.endsWith('.md') || f.endsWith('.json'));
+  const files = fs.readdirSync(documentsPath).filter(f =>
+    (f.endsWith('.md') || f.endsWith('.json')) && !f.startsWith('_')
+  );
+  const seenIds = new Set();
   const documents = files.map(file => {
-    // 跳过 _order.json（文档排序文件，不是文档）
     if (file === '_order.json') return null;
 
     const fullPath = path.join(documentsPath, file);
@@ -323,20 +343,35 @@ ipcMain.handle('load-documents', async () => {
 
     if (file.endsWith('.json')) {
       try {
-        return JSON.parse(raw);
+        const doc = JSON.parse(raw);
+        seenIds.add(doc.id);
+        return doc;
       } catch (error) {
         const fallbackId = path.basename(file, '.json');
-        return {
-          id: fallbackId,
-          title: 'Untitled Document',
-          subtitle: 'NEW DRAFT',
-          content: raw
-        };
+        return { id: fallbackId, title: 'Untitled Document', subtitle: 'NEW DRAFT', content: raw };
       }
     }
 
+    // 旧版 .md 文件 — 迁移到 .json
     const fallbackId = path.basename(file, '.md');
-    return parseMarkdownDocument(raw, fallbackId);
+    const doc = parseMarkdownDocument(raw, fallbackId);
+
+    // 如果已存在同 ID 的 .json 文件，跳过 .md（避免重复）
+    if (seenIds.has(doc.id)) return null;
+
+    // 自动迁移: 写入 .json 并删除旧 .md
+    try {
+      const jsonPath = path.join(documentsPath, `${doc.id}.json`);
+      if (!fs.existsSync(jsonPath)) {
+        fs.writeFileSync(jsonPath, toJsonDocument(doc), 'utf-8');
+      }
+      fs.unlinkSync(fullPath);
+    } catch (e) {
+      // 迁移失败不影响文档加载
+    }
+
+    seenIds.add(doc.id);
+    return doc;
   }).filter(Boolean);
 
   // 读取保存的文档顺序，按顺序排序
@@ -375,6 +410,28 @@ ipcMain.handle('save-documents-order', async (event, order) => {
   return true;
 });
 
+ipcMain.handle('save-collections', async (event, collections) => {
+  const userDataPath = app.getPath('userData');
+  const documentsPath = path.join(userDataPath, 'documents');
+  if (!fs.existsSync(documentsPath)) {
+    fs.mkdirSync(documentsPath, { recursive: true });
+  }
+  fs.writeFileSync(path.join(documentsPath, '_collections.json'), JSON.stringify(collections), 'utf-8');
+  return true;
+});
+
+ipcMain.handle('load-collections', async () => {
+  const userDataPath = app.getPath('userData');
+  const collectionsPath = path.join(userDataPath, 'documents', '_collections.json');
+  try {
+    if (fs.existsSync(collectionsPath)) {
+      const data = JSON.parse(fs.readFileSync(collectionsPath, 'utf-8'));
+      if (Array.isArray(data)) return data;
+    }
+  } catch (e) { /* ignore */ }
+  return [];
+});
+
 ipcMain.handle('delete-document', async (event, id) => {
   const userDataPath = app.getPath('userData');
   const docPathMd = path.join(userDataPath, 'documents', `${id}.md`);
@@ -392,21 +449,35 @@ ipcMain.handle('delete-document', async (event, id) => {
   return deleted;
 });
 
-ipcMain.handle('show-save-dialog', async () => {
+ipcMain.handle('show-save-dialog', async (event, defaultName) => {
   const result = await dialog.showSaveDialog(mainWindow, {
     title: 'Export Document',
-    defaultPath: 'document.md',
+    defaultPath: defaultName || 'document.md',
     filters: [
       { name: 'Markdown', extensions: ['md'] },
-      { name: 'Text', extensions: ['txt'] },
-      { name: 'All Files', extensions: ['*'] }
+      { name: 'Plain Text', extensions: ['txt'] },
+      { name: 'JSON', extensions: ['json'] },
+      { name: 'HTML', extensions: ['html'] },
+      { name: 'All Files', extensions: ['*'] },
     ]
   });
   return result;
 });
 
+ipcMain.handle('show-directory-dialog', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Select Export Directory',
+    properties: ['openDirectory', 'createDirectory'],
+  });
+  return { canceled: result.canceled, directoryPath: result.filePaths?.[0] };
+});
+
 ipcMain.handle('export-document', async (event, { filePath, content }) => {
   try {
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
     fs.writeFileSync(filePath, content, 'utf-8');
     return { success: true };
   } catch (error) {

@@ -12,6 +12,7 @@ import SideBar from './components/SideBar';
 import Editor from './components/Editor';
 import BottomBar from './components/BottomBar';
 import SettingsPanel from './components/SettingsPanel';
+import SidebarContextMenu, { type ExportFormat, type ContextMenuState } from './components/SidebarContextMenu';
 import AmbientMusicPlayer from './components/AmbientMusicPlayer';
 // import UpdateNotification from './components/UpdateNotification';
 import WelcomePage from './components/WelcomePage';
@@ -20,6 +21,7 @@ import { I18nProvider, useI18n } from './lib/i18n';
 import { loadSettings, saveSettings, DEFAULT_SETTINGS } from './lib/settings';
 import type { AppSettings } from './lib/settings';
 import { getFont, DEFAULT_FONT_ID } from './lib/fonts';
+import { toPlainText, toHtml, toMarkdown, toJsonExport } from './lib/export';
 
 /**
  * 场景类型 - 定义可用的背景效果
@@ -39,6 +41,7 @@ export interface TabData {
   subtitle: string;    // 文档副标题（日期）
   content: string;     // 文档内容
   isSaved?: boolean;   // 是否已保存
+  collection?: string; // 所属合集名称
 }
 
 /**
@@ -58,6 +61,7 @@ function AppContent() {
   const [isUIVisible, setIsUIVisible] = useState(true);           // 控制 UI 元素显示/隐藏
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);       // 侧边栏开关状态
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);      // 设置面板开关状态
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null); // 右键导出菜单
 
   const { t, lang, setLang, toggleLang } = useI18n();
 
@@ -95,6 +99,9 @@ function AppContent() {
   const [openTabIds, setOpenTabIds] = useState<string[]>([]);      // 当前打开的标签页 ID 列表
   const [activeTabId, setActiveTabId] = useState<string | null>(null);  // 当前活动标签页 ID
 
+  // ========== 合集管理 ==========
+  const [collections, setCollections] = useState<string[]>([]);
+
   // 计算当前打开的标签页
   const openTabs = openTabIds
     .map(id => documents.find(doc => doc.id === id))
@@ -104,6 +111,13 @@ function AppContent() {
   const activeTab = activeTabId ? documents.find(t => t.id === activeTabId) ?? null : null;
 
   const isElectron = typeof window !== 'undefined' && window.electronAPI;
+
+  const saveCollections = useCallback(async (cols: string[]) => {
+    setCollections(cols);
+    if (isElectron) {
+      await window.electronAPI.saveCollections(cols);
+    }
+  }, [isElectron]);
 
   const calculateWordCount = (text: string) => {
     if (!text) return 0;
@@ -123,9 +137,9 @@ function AppContent() {
     }
 
     try {
-      const documents = await window.electronAPI.loadDocuments();
-      if (documents && documents.length > 0) {
-        return documents.map(d => ({ ...d, isSaved: true }));
+      const docs = await window.electronAPI.loadDocuments();
+      if (docs && docs.length > 0) {
+        return docs.map(d => ({ ...d, title: d.title || 'Untitled Document', subtitle: d.subtitle || '', isSaved: true }));
       }
     } catch (error) {
       console.error('Failed to load documents:', error);
@@ -135,13 +149,14 @@ function AppContent() {
 
   const saveDocument = useCallback(async (tab: TabData) => {
     if (!isElectron) return;
-    
+
     try {
       await window.electronAPI.saveDocument({
         id: tab.id,
         title: tab.title,
         subtitle: tab.subtitle,
-        content: tab.content
+        content: tab.content,
+        collection: tab.collection,
       });
       setDocuments(prev => prev.map(t => t.id === tab.id ? { ...t, isSaved: true } : t));
     } catch (error) {
@@ -156,12 +171,14 @@ function AppContent() {
 
   useEffect(() => {
     const init = async () => {
-      const [docs, , settings] = await Promise.all([
+      const [docs, , settings, savedCollections] = await Promise.all([
         loadDocuments(),
         loadCustomConfig(),
         loadSettings(),
+        isElectron ? window.electronAPI.loadCollections().catch(() => []) : Promise.resolve([]),
       ]);
       setDocuments(docs);
+      if (Array.isArray(savedCollections)) setCollections(savedCollections);
 
       // 应用持久化的设置
       const s = { ...DEFAULT_SETTINGS, ...settings };
@@ -296,19 +313,99 @@ function AppContent() {
   const handleDeleteDocument = async (id: string) => {
     if (!isElectron) return;
 
+    // 先移除本地状态，取消自动保存（触发 effect cleanup），再删磁盘文件
+    const newOpenTabIds = openTabIds.filter(tabId => tabId !== id);
+    setDocuments(prev => prev.filter(doc => doc.id !== id));
+    setOpenTabIds(newOpenTabIds);
+    if (activeTabId === id) {
+      setActiveTabId(newOpenTabIds[newOpenTabIds.length - 1] ?? null);
+    }
+
     try {
       await window.electronAPI.deleteDocument(id);
-      setDocuments(prev => prev.filter(doc => doc.id !== id));
-      const newOpenTabIds = openTabIds.filter(tabId => tabId !== id);
-      setOpenTabIds(newOpenTabIds);
-
-      if (activeTabId === id) {
-        setActiveTabId(newOpenTabIds[newOpenTabIds.length - 1] ?? null);
-      }
     } catch (error) {
-      console.error('Failed to delete document:', error);
+      console.error('Failed to delete document from disk:', error);
     }
   };
+
+  const formatDoc = useCallback((doc: TabData, format: ExportFormat) => {
+    switch (format) {
+      case 'json': return toJsonExport(doc);
+      case 'html': {
+        const html = toHtml(doc.content);
+        const title = (doc.title || 'Untitled Document').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+        const subtitle = (doc.subtitle || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+        return html.replace('<body>', `<body>\n<h1>${title}</h1>\n<p class="subtitle">${subtitle}</p>\n`);
+      }
+      case 'md': return `# ${doc.title || 'Untitled Document'}\n> ${doc.subtitle || ''}\n\n---\n\n${toMarkdown(doc.content)}`;
+      case 'txt':
+      default: return `${doc.title || 'Untitled Document'}\n${doc.subtitle || ''}\n${'='.repeat(40)}\n\n${toPlainText(doc.content)}`;
+    }
+  }, []);
+
+  // 导出单个文档
+  const handleExportDocument = useCallback(async (docId: string, format: ExportFormat) => {
+    if (!isElectron) return;
+    const doc = documents.find(d => d.id === docId);
+    if (!doc) return;
+    const ext = '.' + format;
+    const defaultName = `${doc.title || 'document'}${ext}`;
+    const result = await window.electronAPI.showSaveDialog(defaultName);
+    if (result.canceled || !result.filePath) return;
+    await window.electronAPI.exportDocument({ filePath: result.filePath, content: formatDoc(doc, format) }).catch(console.error);
+  }, [isElectron, documents, formatDoc]);
+
+  // 导出合集
+  const handleExportCollection = useCallback(async (collectionName: string, format: ExportFormat) => {
+    if (!isElectron) return;
+    const docs = documents.filter(d => d.collection === collectionName);
+    if (docs.length === 0) return;
+    const dirResult = await window.electronAPI.showDirectoryDialog();
+    if (dirResult.canceled || !dirResult.directoryPath) return;
+    const ext = '.' + format;
+    for (const doc of docs) {
+      const safeName = (doc.title || 'Untitled Document').replace(/[/\\?%*:|"<>]/g, '_').slice(0, 100);
+      const dir = `${dirResult.directoryPath}/${collectionName}`;
+      const filePath = `${dir}/${safeName}${ext}`;
+      // 先导出到根目录 + 合集名作为文件名前缀，模拟文件夹结构
+      await window.electronAPI.exportDocument({ filePath, content: formatDoc(doc, format) }).catch(console.error);
+    }
+  }, [isElectron, documents, formatDoc]);
+
+  // 导出全部
+  const handleExportAll = useCallback(async (format: ExportFormat) => {
+    if (!isElectron) return;
+    if (documents.length === 0) return;
+    const dirResult = await window.electronAPI.showDirectoryDialog();
+    if (dirResult.canceled || !dirResult.directoryPath) return;
+    const ext = '.' + format;
+    // 按合集分组
+    const grouped = new Map<string, TabData[]>();
+    const uncategorized: TabData[] = [];
+    for (const doc of documents) {
+      if (doc.collection) {
+        const list = grouped.get(doc.collection) || [];
+        list.push(doc);
+        grouped.set(doc.collection, list);
+      } else {
+        uncategorized.push(doc);
+      }
+    }
+    // 导出合集
+    for (const [colName, colDocs] of grouped) {
+      for (const doc of colDocs) {
+        const safeName = (doc.title || 'Untitled Document').replace(/[/\\?%*:|"<>]/g, '_').slice(0, 100);
+        const filePath = `${dirResult.directoryPath}/${colName}/${safeName}${ext}`;
+        await window.electronAPI.exportDocument({ filePath, content: formatDoc(doc, format) }).catch(console.error);
+      }
+    }
+    // 导出未分类
+    for (const doc of uncategorized) {
+      const safeName = (doc.title || 'Untitled Document').replace(/[/\\?%*:|"<>]/g, '_').slice(0, 100);
+      const filePath = `${dirResult.directoryPath}/Uncategorized/${safeName}${ext}`;
+      await window.electronAPI.exportDocument({ filePath, content: formatDoc(doc, format) }).catch(console.error);
+    }
+  }, [isElectron, documents, formatDoc]);
 
   useEffect(() => {
     if (!isElectron || !activeTab || activeTab.isSaved) return;
@@ -394,10 +491,6 @@ function AppContent() {
         toggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
         lang={lang}
         toggleLang={toggleLang}
-        fontFamily={fontFamily}
-        onFontFamilyChange={(id) => setFontFamily(id)}
-        editorFontSize={clampedEditorFontSize}
-        onEditorFontSizeChange={(size) => setEditorFontSize(Math.min(32, Math.max(14, size)))}
         scene={scene}
         setScene={setScene}
         tabs={openTabs}
@@ -407,15 +500,41 @@ function AppContent() {
         onCloseTab={handleCloseTab}
         onAddTab={handleAddTab}
       />
-      
-      <SideBar 
-        isOpen={isSidebarOpen} 
+
+      <SidebarContextMenu
+        menu={contextMenu}
+        onClose={() => setContextMenu(null)}
+        onSelectFormat={(format) => {
+          if (!contextMenu) return;
+          setContextMenu(null);
+          if (contextMenu.mode === 'document' && contextMenu.docId) {
+            handleExportDocument(contextMenu.docId, format);
+          } else if (contextMenu.mode === 'collection' && contextMenu.collectionName) {
+            handleExportCollection(contextMenu.collectionName, format);
+          } else if (contextMenu.mode === 'all') {
+            handleExportAll(format);
+          }
+        }}
+      />
+
+      <SideBar
+        isOpen={isSidebarOpen}
         tabs={documents}
+        onContextMenu={(e, mode, docId, collectionName) => {
+          setContextMenu({ x: e.clientX, y: e.clientY, mode, docId, collectionName });
+        }}
         activeTabId={activeTabId}
         onSelectTab={openDocument}
         onDeleteTab={handleDeleteDocument}
         onAddTab={handleAddTab}
         onReorderTabs={handleReorderDocuments}
+        collections={collections}
+        onCollectionsChange={saveCollections}
+        onMoveToCollection={(docId, collection) => {
+          setDocuments(prev => prev.map(d => d.id === docId ? { ...d, collection, isSaved: false } : d));
+          const doc = documents.find(d => d.id === docId);
+          if (doc) saveDocument({ ...doc, collection });
+        }}
       />
 
       <SettingsPanel 

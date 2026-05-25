@@ -39,7 +39,7 @@ const translations: Record<Lang, Record<string, string>> = {
     'welcome.documents': 'documents',
     'welcome.createNew': 'Create New Document',
     'welcome.openExisting': 'Open Existing Document',
-    'welcome.shortcut': 'Press Cmd+N to create new document \u00B7 Cmd+Shift+S to open sidebar',
+    'welcome.shortcut': 'Press {newDoc} to create new document \u00B7 {toggleSidebar} to open sidebar',
 
     /* Settings Panel */
     'settings.title': 'Environment Settings',
@@ -81,6 +81,13 @@ const translations: Record<Lang, Record<string, string>> = {
     'sidebar.deleteWarning': 'This will delete "{title}" locally. This action cannot be undone.',
     'sidebar.cancel': 'Cancel',
     'sidebar.delete': 'Delete',
+    'sidebar.uncategorized': 'Uncategorized',
+    'sidebar.newCollection': 'New Collection',
+    'sidebar.collectionNamePlaceholder': 'Collection name',
+    'sidebar.collectionEmpty': 'Empty',
+    'sidebar.exportDocument': 'Export Document',
+    'sidebar.exportCollection': 'Export Collection',
+    'sidebar.exportAll': 'Export All',
 
     /* Editor */
     'editor.noDocument': 'No document open',
@@ -121,7 +128,7 @@ const translations: Record<Lang, Record<string, string>> = {
     'welcome.documents': '篇文档',
     'welcome.createNew': '新建文档',
     'welcome.openExisting': '打开已有文档',
-    'welcome.shortcut': '按 Cmd+N 新建文档 \u00B7 Cmd+Shift+S 打开侧边栏',
+    'welcome.shortcut': '按 {newDoc} 新建文档 \u00B7 {toggleSidebar} 打开侧边栏',
 
     /* Settings Panel */
     'settings.title': '环境设置',
@@ -163,6 +170,13 @@ const translations: Record<Lang, Record<string, string>> = {
     'sidebar.deleteWarning': '将本地删除"{title}"。此操作无法撤销。',
     'sidebar.cancel': '取消',
     'sidebar.delete': '删除',
+    'sidebar.uncategorized': '未分类',
+    'sidebar.newCollection': '新建合集',
+    'sidebar.collectionNamePlaceholder': '合集名称',
+    'sidebar.collectionEmpty': '空',
+    'sidebar.exportDocument': '导出文档',
+    'sidebar.exportCollection': '导出合集',
+    'sidebar.exportAll': '导出全部',
 
     /* Editor */
     'editor.noDocument': '未打开文档',

@@ -92,7 +92,9 @@ export default function WelcomePage({ onCreateDocument, onOpenDocument, document
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
         >
-          {t('welcome.shortcut')}
+          {t('welcome.shortcut')
+            .replace('{newDoc}', navigator.platform.includes('Mac') ? 'Cmd+N' : 'Ctrl+N')
+            .replace('{toggleSidebar}', navigator.platform.includes('Mac') ? 'Cmd+Shift+S' : 'Ctrl+Shift+S')}
         </motion.p>
       </motion.div>
     </div>

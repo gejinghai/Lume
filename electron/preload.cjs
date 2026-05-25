@@ -14,9 +14,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveDocument: (doc) => ipcRenderer.invoke('save-document', doc),    // 保存文档
   loadDocuments: () => ipcRenderer.invoke('load-documents'),        // 加载所有文档
   deleteDocument: (id) => ipcRenderer.invoke('delete-document', id), // 删除文档
+
+  // ========== 合集管理 API ==========
+  saveCollections: (collections) => ipcRenderer.invoke('save-collections', collections),
+  loadCollections: () => ipcRenderer.invoke('load-collections'),
   
   // ========== 导入导出 API ==========
-  showSaveDialog: () => ipcRenderer.invoke('show-save-dialog'),        // 显示保存对话框
+  showSaveDialog: (defaultName) => ipcRenderer.invoke('show-save-dialog', defaultName),        // 显示保存对话框
+  showDirectoryDialog: () => ipcRenderer.invoke('show-directory-dialog'),                      // 显示目录选择对话框
   exportDocument: (data) => ipcRenderer.invoke('export-document', data),  // 导出文档
   
   // ========== 窗口操作 API ==========
