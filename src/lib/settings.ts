@@ -11,12 +11,15 @@ export interface AppSettings {
   scene?: SceneType;
   rainIntensity?: number;
   thunderEnabled?: boolean;
+  thunderVisualEnabled?: boolean;
   starDensity?: number;
   whiteNoiseEnabled?: boolean;
   ambientSoundsEnabled?: boolean;
   volume?: number;
   auroraCount?: number;
   lang?: 'en' | 'zh';
+  /** Settings schema version for migrations */
+  settingsVersion?: number;
 }
 
 /**
@@ -28,12 +31,14 @@ export const DEFAULT_SETTINGS: AppSettings = {
   scene: 'rain',
   rainIntensity: 0.6,
   thunderEnabled: false,
+  thunderVisualEnabled: false,
   starDensity: 400,
   whiteNoiseEnabled: true,
   ambientSoundsEnabled: false,
   volume: 0.5,
   auroraCount: 5,
   lang: 'en',
+  settingsVersion: 2,
 };
 
 const isElectron = typeof window !== 'undefined' && window.electronAPI;

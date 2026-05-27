@@ -19,6 +19,8 @@ interface SettingsPanelProps {
   setVolume: (val: number) => void;
   thunderEnabled: boolean;
   setThunderEnabled: (val: boolean) => void;
+  thunderVisualEnabled: boolean;
+  setThunderVisualEnabled: (val: boolean) => void;
   starDensity: number;
   setStarDensity: (val: number) => void;
   whiteNoiseEnabled: boolean;
@@ -70,6 +72,7 @@ export default function SettingsPanel({
   rainIntensity, setRainIntensity,
   volume, setVolume,
   thunderEnabled, setThunderEnabled,
+  thunderVisualEnabled, setThunderVisualEnabled,
   starDensity, setStarDensity,
   whiteNoiseEnabled, setWhiteNoiseEnabled,
   ambientSoundsEnabled, setAmbientSoundsEnabled,
@@ -85,6 +88,7 @@ export default function SettingsPanel({
   const [customOpen, setCustomOpen] = useState(false);
   const [customFiles, setCustomFiles] = useState<Record<string, Record<string, string>>>({});
   const [loadingRes, setLoadingRes] = useState<string | null>(null);
+
 
   // 打开面板时加载自定义配置
   useEffect(() => {
@@ -244,12 +248,12 @@ export default function SettingsPanel({
               />
             </div>
 
-            {/* Thunder Toggle (Only for Rain) */}
+            {/* Thunder Sound (Only for Rain) */}
             {scene === 'rain' && (
               <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center space-x-2 text-xs text-on-surface-variant">
                   <Zap className="w-3.5 h-3.5" />
-                  <span>{t('settings.enableThunder')}</span>
+                  <span>{t('settings.thunderSound')}</span>
                 </div>
                 <button
                   onClick={() => setThunderEnabled(!thunderEnabled)}
@@ -258,6 +262,26 @@ export default function SettingsPanel({
                   <motion.div
                     className="w-3 h-3 bg-white rounded-full absolute top-1"
                     animate={{ left: thunderEnabled ? '24px' : '4px' }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  />
+                </button>
+              </div>
+            )}
+
+            {/* Lightning Visual (Only for Rain) */}
+            {scene === 'rain' && (
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center space-x-2 text-xs text-on-surface-variant">
+                  <Zap className="w-3.5 h-3.5" />
+                  <span>{t('settings.thunderVisual')}</span>
+                </div>
+                <button
+                  onClick={() => setThunderVisualEnabled(!thunderVisualEnabled)}
+                  className={`w-10 h-5 rounded-full transition-colors relative ${thunderVisualEnabled ? 'bg-secondary' : 'bg-outline-variant/30'}`}
+                >
+                  <motion.div
+                    className="w-3 h-3 bg-white rounded-full absolute top-1"
+                    animate={{ left: thunderVisualEnabled ? '24px' : '4px' }}
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
                 </button>
@@ -434,6 +458,7 @@ export default function SettingsPanel({
               </AnimatePresence>
             </div>
           )}
+
         </motion.div>
       )}
     </AnimatePresence>

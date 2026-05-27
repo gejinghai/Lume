@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Languages, Settings, PanelLeft, CloudRain, Snowflake, Star, Waves, X, Plus, Circle } from 'lucide-react';
+import { Languages, Settings, PanelLeft, CloudRain, Snowflake, Star, Waves, X, Plus, Circle, Info } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { useI18n } from '../lib/i18n';
 
@@ -10,6 +10,7 @@ interface TopBarProps {
   isUIVisible: boolean;                        // UI是否可见
   toggleSidebar: () => void;                  // 切换侧边栏
   toggleSettings?: () => void;               // 切换设置面板
+  toggleAbout?: () => void;                  // 切换关于面板
   scene: 'rain' | 'snow' | 'stars' | 'aurora';  // 当前场景类型
   setScene: (scene: 'rain' | 'snow' | 'stars' | 'aurora') => void;  // 场景切换回调
   tabs: {                                  // 标签页列表
@@ -34,7 +35,7 @@ interface TopBarProps {
  * 使用 Framer Motion 实现标签拖拽动画
  */
 export default function TopBar({
-  isUIVisible, toggleSidebar, toggleSettings, scene, setScene,
+  isUIVisible, toggleSidebar, toggleSettings, toggleAbout, scene, setScene,
   tabs, activeTabId, onReorderTabs, onSelectTab, onCloseTab, onAddTab,
   lang, toggleLang
 }: TopBarProps) {
@@ -155,6 +156,13 @@ export default function TopBar({
             >
               <Languages className="w-4 h-4" />
               <span className="text-[10px] font-medium tracking-wider opacity-70">{lang === 'en' ? 'EN' : '中'}</span>
+            </button>
+            <button
+              onClick={toggleAbout}
+              className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-md transition-colors"
+              title={t('topbar.about')}
+            >
+              <Info className="w-4 h-4" />
             </button>
             <button
               onClick={toggleSettings}

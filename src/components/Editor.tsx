@@ -108,6 +108,7 @@ export default function Editor({ fontFamily, isUIVisible, tab, fontSizePx, onUpd
               fontFamilyId={fontFamily}
               readOnly={isClearing}
               onEditorReady={setEditor}
+              placeholder={t('editor.startWriting')}
             />
           </div>
 

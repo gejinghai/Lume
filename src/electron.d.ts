@@ -29,7 +29,9 @@ export interface ElectronAPI {
   getCustomFolderPath: () => Promise<string>;
   openFolder: (folderPath: string) => Promise<{ success: boolean; error?: string }>;
   readCustomAssetDataUrl: (data: { type: string; name: string }) => Promise<string | null>;
-  
+  openExternal: (url: string) => Promise<{ success: boolean; error?: string }>;
+  getArch: () => string;
+
   onNewDocument: (callback: () => void) => void;
   onNewWindow: (callback: () => void) => void;
   onSaveDocument: (callback: () => void) => void;

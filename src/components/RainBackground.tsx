@@ -225,6 +225,7 @@ interface RainBackgroundProps {
   intensity?: number;
   volume?: number;
   thunderEnabled?: boolean;
+  thunderVisualEnabled?: boolean;
   whiteNoiseEnabled?: boolean;
   customVersion?: number;
 }
@@ -233,6 +234,7 @@ export default function RainBackground({
   intensity = 0.5,
   volume = 0.5,
   thunderEnabled = false,
+  thunderVisualEnabled = false,
   whiteNoiseEnabled = true,
   customVersion = 0,
 }: RainBackgroundProps) {
@@ -270,10 +272,9 @@ export default function RainBackground({
 
     const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)!;
     
-    // Inject thunderEnabled into shader if needed, or just let the shader do its default lightning
-    // The original shader has lightning built-in. We can toggle it by modifying the shader source.
+    // 闪电视觉特效开关
     let modifiedFragmentSource = fragmentShaderSource;
-    if (!thunderEnabled) {
+    if (!thunderVisualEnabled) {
       // Disable lightning by replacing the lightning calculation
       modifiedFragmentSource = modifiedFragmentSource.replace(
         'float lightning = sin(t*sin(t*10.));',
@@ -418,7 +419,7 @@ export default function RainBackground({
       gl.deleteTexture(texture);
       gl.deleteBuffer(positionBuffer);
     };
-  }, [intensity, thunderEnabled, customVersion]); // Re-compile shader if thunderEnabled changes
+  }, [intensity, thunderVisualEnabled, customVersion]);
 
   return (
     <>

@@ -55,6 +55,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getCustomFolderPath: () => ipcRenderer.invoke('get-custom-folder-path'),
   openFolder: (folderPath) => ipcRenderer.invoke('open-folder', folderPath),
   readCustomAssetDataUrl: (data) => ipcRenderer.invoke('read-custom-asset-dataurl', data),
+  openExternal: (url) => ipcRenderer.invoke('open-external', url),
+  getArch: () => process.arch, // arm64 / x64
 
   // ========== 设置持久化 API ==========
   saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),

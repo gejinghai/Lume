@@ -1,6 +1,6 @@
 {
   "name": "lume",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "A minimalist immersive writing application for macOS",
   "author": "Lume Team",
   "main": "electron/main.cjs",
@@ -26,6 +26,7 @@
     "@tiptap/extension-image": "^3.23.6",
     "@tiptap/extension-link": "^3.23.6",
     "@tiptap/extension-mathematics": "^3.23.6",
+    "@tiptap/extension-placeholder": "^3.23.6",
     "@tiptap/extension-table": "^3.23.6",
     "@tiptap/extension-table-cell": "^3.23.6",
     "@tiptap/extension-table-header": "^3.23.6",

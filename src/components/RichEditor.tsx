@@ -11,6 +11,7 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { Mathematics } from '@tiptap/extension-mathematics';
 import { Highlight } from '@tiptap/extension-highlight';
+import Placeholder from '@tiptap/extension-placeholder';
 import type { Editor as TiptapEditorType } from '@tiptap/core';
 import { getFont } from '../lib/fonts';
 
@@ -58,6 +59,8 @@ export interface RichEditorProps {
   readOnly?: boolean;
   /** 编辑器就绪回调 */
   onEditorReady?: (editor: TiptapEditorType | null) => void;
+  /** 空内容占位文本 */
+  placeholder?: string;
 }
 
 export default function RichEditor({
@@ -67,6 +70,7 @@ export default function RichEditor({
   fontFamilyId,
   readOnly = false,
   onEditorReady,
+  placeholder,
 }: RichEditorProps) {
   // 跟踪 onEditorReady 和 onChange 避免 effect 重跑 / 闭包陈旧
   const readyRef = useRef(onEditorReady);
@@ -93,6 +97,9 @@ export default function RichEditor({
       Highlight.configure({ multicolor: true }),
       Mathematics.configure({
         katexOptions: { throwOnError: false },
+      }),
+      Placeholder.configure({
+        placeholder: placeholder || 'Start writing…',
       }),
     ],
     content: parseContent(content),

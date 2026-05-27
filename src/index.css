@@ -72,6 +72,17 @@ body {
 
 .ProseMirror p { margin: 0.35em 0; }
 
+/* TipTap 空内容占位提示 */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--color-outline-variant);
+  pointer-events: none;
+  height: 0;
+  opacity: 0.5;
+  font-weight: 300;
+}
+
 /* 标题 */
 .ProseMirror h1 { font-size: 2em; font-weight: 300; margin: 0.8em 0 0.3em; }
 .ProseMirror h2 { font-size: 1.5em; font-weight: 300; margin: 0.7em 0 0.3em; }

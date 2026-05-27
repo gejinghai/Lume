@@ -25,6 +25,7 @@ const translations: Record<Lang, Record<string, string>> = {
     'topbar.sans': 'sans',
     'topbar.serif': 'serif',
     'topbar.settings': 'Settings',
+    'topbar.about': 'About',
 
     /* Scene names */
     'scene.rain': 'Rain',
@@ -46,7 +47,8 @@ const translations: Record<Lang, Record<string, string>> = {
     'settings.rainIntensity': 'Rain Intensity',
     'settings.snowIntensity': 'Snow Intensity',
     'settings.volume': 'Background Volume',
-    'settings.enableThunder': 'Enable Thunder',
+    'settings.thunderSound': 'Thunder Sound',
+    'settings.thunderVisual': 'Lightning Flash',
     'settings.starDensity': 'Star Density',
     'settings.auroraDensity': 'Aurora Density',
     'settings.auroraCount': 'Aurora Count',
@@ -100,6 +102,19 @@ const translations: Record<Lang, Record<string, string>> = {
     'bottomBar.words': 'Words',
     'bottomBar.chars': 'Chars',
     'bottomBar.system': 'System',
+
+    /* About & Updates */
+    'about.title': 'About',
+    'about.version': 'Version',
+    'about.author': 'Author',
+    'about.website': 'Website',
+    'about.tagline': 'A peaceful writing environment',
+    'update.check': 'Check for Updates',
+    'update.checking': 'Checking...',
+    'update.latest': 'You have the latest version.',
+    'update.available': 'New version available:',
+    'update.download': 'Download',
+    'update.error': 'Check failed',
   },
 
   zh: {
@@ -114,6 +129,7 @@ const translations: Record<Lang, Record<string, string>> = {
     'topbar.sans': '无衬线',
     'topbar.serif': '衬线',
     'topbar.settings': '设置',
+    'topbar.about': '关于',
 
     /* Scene names */
     'scene.rain': '雨',
@@ -135,7 +151,8 @@ const translations: Record<Lang, Record<string, string>> = {
     'settings.rainIntensity': '雨滴强度',
     'settings.snowIntensity': '雪花强度',
     'settings.volume': '背景音量',
-    'settings.enableThunder': '启用雷声',
+    'settings.thunderSound': '雷声音效',
+    'settings.thunderVisual': '闪电特效',
     'settings.starDensity': '星星密度',
     'settings.auroraDensity': '极光密度',
     'settings.auroraCount': '极光数量',
@@ -189,6 +206,19 @@ const translations: Record<Lang, Record<string, string>> = {
     'bottomBar.words': '字数',
     'bottomBar.chars': '字符',
     'bottomBar.system': '系统',
+
+    /* About & Updates */
+    'about.title': '关于',
+    'about.version': '版本',
+    'about.author': '作者',
+    'about.website': '官网',
+    'about.tagline': '一个安静的写作环境',
+    'update.check': '检查更新',
+    'update.checking': '检查中...',
+    'update.latest': '已是最新版本。',
+    'update.available': '新版本可用：',
+    'update.download': '下载',
+    'update.error': '检查失败',
   },
 };
 

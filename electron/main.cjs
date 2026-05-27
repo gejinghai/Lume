@@ -623,6 +623,14 @@ ipcMain.handle('open-folder', async (event, folderPath) => {
     return { success: false, error: error.message };
   }
 });
+ipcMain.handle('open-external', async (event, url) => {
+  try {
+    await shell.openExternal(url);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
 ipcMain.handle('read-custom-asset-dataurl', async (event, { type, name }) => {
   try {
     const config = readCustomConfig();

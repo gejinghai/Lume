@@ -12,6 +12,7 @@ import SideBar from './components/SideBar';
 import Editor from './components/Editor';
 import BottomBar from './components/BottomBar';
 import SettingsPanel from './components/SettingsPanel';
+import AboutPanel from './components/AboutPanel';
 import SidebarContextMenu, { type ExportFormat, type ContextMenuState } from './components/SidebarContextMenu';
 import AmbientMusicPlayer from './components/AmbientMusicPlayer';
 // import UpdateNotification from './components/UpdateNotification';
@@ -61,6 +62,7 @@ function AppContent() {
   const [isUIVisible, setIsUIVisible] = useState(true);           // 控制 UI 元素显示/隐藏
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);       // 侧边栏开关状态
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);      // 设置面板开关状态
+  const [isAboutOpen, setIsAboutOpen] = useState(false);            // 关于面板开关状态
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null); // 右键导出菜单
 
   const { t, lang, setLang, toggleLang } = useI18n();
@@ -77,6 +79,7 @@ function AppContent() {
   // 天气效果参数
   const [rainIntensity, setRainIntensity] = useState(0.6);         // 雨滴强度 (0-1)
   const [thunderEnabled, setThunderEnabled] = useState(false);     // 雷声开关
+  const [thunderVisualEnabled, setThunderVisualEnabled] = useState(false); // 闪电特效开关
   
   // 星空效果参数
   const [starDensity, setStarDensity] = useState(400);            // 星星密度
@@ -180,6 +183,19 @@ function AppContent() {
       setDocuments(docs);
       if (Array.isArray(savedCollections)) setCollections(savedCollections);
 
+      // Settings migration: thunderVisualEnabled was split from thunderEnabled in v2.
+      // Old saves may have thunderVisualEnabled=true from the combined toggle — ignore it.
+      const savedVersion = (settings as any)?.settingsVersion;
+      if (!savedVersion || savedVersion < 2) {
+        // Old save: clean up stale thunderVisualEnabled and write back migrated settings
+        const { thunderVisualEnabled: _, ...cleaned } = settings as any;
+        cleaned.settingsVersion = 2;
+        saveSettings(cleaned as AppSettings).catch(() => {});
+        // Don't restore thunderVisualEnabled — keep useState(false) default
+      } else {
+        if (settings.thunderVisualEnabled !== undefined) setThunderVisualEnabled(settings.thunderVisualEnabled);
+      }
+
       // 应用持久化的设置
       const s = { ...DEFAULT_SETTINGS, ...settings };
       if (s.fontFamily) setFontFamily(s.fontFamily);
@@ -209,7 +225,7 @@ function AppContent() {
     const timeout = setTimeout(() => {
       void saveSettings({
         fontFamily, editorFontSize, scene,
-        rainIntensity, thunderEnabled, starDensity,
+        rainIntensity, thunderEnabled, thunderVisualEnabled, starDensity,
         whiteNoiseEnabled, ambientSoundsEnabled, volume,
         auroraCount, lang,
       });
@@ -217,7 +233,7 @@ function AppContent() {
     return () => clearTimeout(timeout);
   }, [
     settingsLoaded, fontFamily, editorFontSize, scene,
-    rainIntensity, thunderEnabled, starDensity,
+    rainIntensity, thunderEnabled, thunderVisualEnabled, starDensity,
     whiteNoiseEnabled, ambientSoundsEnabled, volume,
     auroraCount, lang,
   ]);
@@ -454,6 +470,7 @@ function AppContent() {
           intensity={rainIntensity}
           volume={volume}
           thunderEnabled={thunderEnabled}
+          thunderVisualEnabled={thunderVisualEnabled}
           whiteNoiseEnabled={whiteNoiseEnabled}
           customVersion={customVersion}
         />
@@ -489,6 +506,7 @@ function AppContent() {
         isUIVisible={isUIVisible || isSidebarOpen || isSettingsOpen}
         toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         toggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
+        toggleAbout={() => setIsAboutOpen(!isAboutOpen)}
         lang={lang}
         toggleLang={toggleLang}
         scene={scene}
@@ -537,7 +555,12 @@ function AppContent() {
         }}
       />
 
-      <SettingsPanel 
+      <AboutPanel
+        isOpen={isAboutOpen}
+        onClose={() => setIsAboutOpen(false)}
+      />
+
+      <SettingsPanel
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         rainIntensity={rainIntensity}
@@ -546,6 +569,8 @@ function AppContent() {
         setVolume={setVolume}
         thunderEnabled={thunderEnabled}
         setThunderEnabled={setThunderEnabled}
+        thunderVisualEnabled={thunderVisualEnabled}
+        setThunderVisualEnabled={setThunderVisualEnabled}
         starDensity={starDensity}
         setStarDensity={setStarDensity}
         whiteNoiseEnabled={whiteNoiseEnabled}

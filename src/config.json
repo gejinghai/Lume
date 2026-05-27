@@ -1,8 +1,7 @@
 {
-  "app": {
-    "name": "Lume",
-    "version": "1.0.0"
-  },
+  "appVersion": "1.1.0",
+  "websiteUrl": "https://lume.bychato.org",
+  "updateCheckUrl": "https://download.bychato.org/version.json",
   "music": {
     "baseUrl": ""
   }
